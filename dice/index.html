@@ -36,7 +36,7 @@
 
         roll_dice = function(number, size) {
             let result = 0;
-            for (let i = 0; i < Math.max(number, 1); i++) {
+            for (let i = 0; i < number; i++) {
                 result += Math.floor(Math.random() * size) + 1;
             }
             return result;
@@ -50,6 +50,9 @@
             for (let i = 0; i < res.length; i++) {
                 if (/^\d*d\d+$/.test(res[i])) {
                     let d = res[i].split("d");
+                    if (d[0] == "") {
+                        d[0] = 1;
+                    }
                     result += roll_dice(parseInt(d[0]), parseInt(d[1]));
                 } else if (/^\d+$/.test(res[i])) {
                     result += parseInt(res[i]);
