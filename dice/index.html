@@ -1,0 +1,89 @@
+<head>
+    <meta charset="UTF-8">
+    <title Dice roller></title>
+    <style type="text/css">
+    body {
+        display: grid;
+        grid-template-areas:". article .";
+        grid-template-columns: 1fr auto 1fr;
+    }
+
+    article {
+        grid-area: article;
+        display: block;
+        padding: 0.5em;
+        margin: 1em;
+        border: 1px solid black;
+        font-size: large;
+    }
+
+    #result {
+        text-align: center;
+        font-size: x-large;
+    }
+        
+    </style>
+    <script>
+        get_roll = function() {
+            let url = window.location.href;
+            let captured = /roll=([^&]+)/.exec(url);
+            if (captured == null) {
+                return null;
+            } else {
+                return unescape(captured[1]);
+            }
+        }
+
+        roll_dice = function(number, size) {
+            let result = 0;
+            for (let i = 0; i < Math.max(number, 1); i++) {
+                result += Math.floor(Math.random() * size) + 1;
+            }
+            return result;
+        }
+
+        parse_dice_string = function(string) {
+            let res = string.split("+");
+
+            let result = 0;
+
+            for (let i = 0; i < res.length; i++) {
+                if (/^\d*d\d+$/.test(res[i])) {
+                    let d = res[i].split("d");
+                    result += roll_dice(parseInt(d[0]), parseInt(d[1]));
+                } else if (/^\d+$/.test(res[i])) {
+                    result += parseInt(res[i]);
+                } else {
+                    console.log("Invalid dice-token " + res[i]);
+                    return null;
+                }
+            }
+
+            return result;
+        }
+
+        document.addEventListener('DOMContentLoaded', function(){
+            let roll = get_roll();
+            if (roll != null) {
+                roll = roll.replace(/\++/g, "+").replace(/^\+|\+$/g, "");
+                document.forms[0]['roll'].value = roll;
+                result = parse_dice_string(get_roll());
+
+                if (result != null) {
+                    document.getElementById("result").innerHTML = result;
+                }
+            }
+        });
+        
+    </script>
+</head>
+<body>
+<article>
+        <form action="index.html" method="get">
+            <input type="text" name="roll" autofocus="autofocus">
+            <input type="submit" value="Roll">
+        </form>
+        <div id="result"></div>
+</article>
+</body>
+  
