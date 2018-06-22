@@ -65,16 +65,37 @@
             return result;
         }
 
+        remove_space = function(string) {
+            return string.replace(/\++/g, "+").replace(/^\+|\+$/g, "");
+        }
+
         document.addEventListener('DOMContentLoaded', function(){
             let roll = get_roll();
             if (roll != null) {
-                roll = roll.replace(/\++/g, "+").replace(/^\+|\+$/g, "");
+                roll = remove_space(roll);
                 document.forms[0]['roll'].value = roll;
-                result = parse_dice_string(get_roll());
 
+                let result = parse_dice_string(roll);
                 if (result != null) {
                     document.getElementById("result").innerHTML = result;
                 }
+            }
+
+            document.forms[0].onsubmit=function() {
+                let input_value = document.forms[0]['roll'].value;
+                if (input_value == "") {
+                    history.replaceState(null, '', "?");
+                    return false;
+                }
+
+                let roll = remove_space(document.forms[0]['roll'].value);
+                let result = parse_dice_string(roll);
+                if (result != null) {
+                    document.getElementById("result").innerHTML = result;
+                    history.replaceState(null, '', "?roll=" + input_value);
+                }
+
+                return false;
             }
         });
         
@@ -83,7 +104,7 @@
 <body>
 <article>
         <form action="index.html" method="get">
-            <input type="text" name="roll" autofocus="autofocus" placeholder="Input dice...">
+            <input type="text" name="roll" autofocus="autofocus" placeholder="Input dice..." autocomplete="off">
             <input type="submit" value="Roll">
         </form>
         <div id="result"></div>
