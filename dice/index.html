@@ -84,7 +84,7 @@
             document.forms[0].onsubmit=function() {
                 let input_value = document.forms[0]['roll'].value;
                 if (input_value == "") {
-                    history.replaceState(null, '', "?");
+                    history.replaceState(null, document.title, "?");
                     return false;
                 }
 
@@ -92,7 +92,7 @@
                 let result = parse_dice_string(roll);
                 if (result != null) {
                     document.getElementById("result").innerHTML = result;
-                    history.replaceState(null, '', "?roll=" + input_value);
+                    history.replaceState(null, document.title, "?roll=" + input_value);
                 }
 
                 return false;
