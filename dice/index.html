@@ -88,7 +88,7 @@
                     return false;
                 }
 
-                let roll = remove_space(document.forms[0]['roll'].value);
+                let roll = remove_space(document.forms[0]['roll'].value).toLowerCase();
                 let result = parse_dice_string(roll);
                 if (result != null) {
                     document.getElementById("result").innerHTML = result;
