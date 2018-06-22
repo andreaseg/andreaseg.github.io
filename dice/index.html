@@ -66,7 +66,7 @@
         }
 
         remove_space = function(string) {
-            return string.replace(/\++/g, "+").replace(/^\+|\+$/g, "");
+            return string.replace(/\s+/g, "").replace(/\++/g, "+").replace(/^\+|\+$/g, "");
         }
 
         document.addEventListener('DOMContentLoaded', function(){
@@ -92,7 +92,7 @@
                 let result = parse_dice_string(roll);
                 if (result != null) {
                     document.getElementById("result").innerHTML = result;
-                    history.replaceState(null, document.title, "?roll=" + input_value);
+                    history.replaceState(null, document.title, "?roll=" + roll);
                 }
 
                 return false;
