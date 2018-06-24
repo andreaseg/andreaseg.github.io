@@ -1,0 +1,353 @@
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title >Blob map generator</title>
+    <style type="text/css">
+        #tileset_preview {
+            background: repeating-linear-gradient(
+                135deg,
+                rgb(177, 177, 177),
+                rgb(177, 177, 177) 10px,
+                rgb(83, 83, 83) 10px,
+                rgb(83, 83, 83) 20px
+            );
+            padding: 0.5em;
+            display: inline-block;
+        }
+
+        #tileset_preview > img {
+            margin: 2px;
+        }
+
+        a {
+            color:blue;
+            text-decoration: underline;
+            cursor: pointer;
+        }
+
+        #tileset_selector {
+            list-style: none;
+            margin: 0;
+            padding: 0;
+            overflow: auto;
+        }
+
+    </style>
+    <script>
+        let tilesets = ["bw","cave", "metro"];
+        let legal_blob_values = [0, 85, 255,
+                            1, 4, 16, 64,
+                            5, 20, 80, 65,
+                            7, 28, 112, 193,
+                            21, 84, 81, 69,
+                            23, 92, 113, 197,
+                            29, 116, 209, 71,
+                            31, 124, 241, 199,
+                            87, 93, 117, 213,
+                            95, 125, 245, 215,
+                            127, 253, 247, 223, 
+                            17, 68, 119, 221];
+
+
+        generate_seed_matrix = function(x_size, y_size, factor) {
+            let seed_matrix = new Array(x_size);
+            for (let x = 0; x < x_size; x++) {
+                seed_matrix[x] = new Array(y_size);
+            }
+
+            for (let x = 0; x < x_size; x++) {
+                for (let y = 0; y < y_size; y++) {
+                    seed_matrix[x][y] = Math.random() > factor;
+                }
+            }
+
+            return seed_matrix;
+        }
+        
+
+        generate_wang_blob = function(seed_matrix) {
+            let x_size = seed_matrix.length;
+            let y_size = seed_matrix[0].length;
+            let x_dim = 2 * x_size + 1;
+            let y_dim = 2 * y_size + 1
+            let generator_array = new Array(x_dim);
+            for (let x = 0; x < x_dim; x++) {
+                generator_array[x] = new Array(y_dim);
+            }
+
+            // Centers
+            for (let x = 0; x < x_size; x++) {
+                for (let y = 0; y < y_size; y++) {
+                    generator_array[2*x+1][2*y+1] = seed_matrix[x][y];
+                }
+            }
+
+            // Edges
+            for (let x = 1; x < x_dim; x+= 2) {
+                for (let y = 0; y < y_dim; y+= 2) {
+                    if ((y > 0 ? generator_array[x][y-1] == 1 : false)
+                     && (y < y_dim - 1 ? generator_array[x][y+1] == 1 : false)) {
+                        generator_array[x][y] = 1;
+                    } else {
+                        generator_array[x][y] = 0;
+                    }
+                }
+            }
+
+            // Edges
+            for (let x = 0; x < x_dim; x+= 2) {
+                for (let y = 1; y < y_dim; y+= 2) {
+                    if ((x > 0 ? generator_array[x-1][y] == 1 : false)
+                     && (x < x_dim - 1 ? generator_array[x+1][y] == 1 : false)) {
+                        generator_array[x][y] = 1;
+                    } else {
+                        generator_array[x][y] = 0;
+                    }
+                }
+            }
+
+            // Corners
+            for (let x = 0; x < x_dim; x+= 2) {
+                for (let y = 0; y < y_dim; y+= 2) {
+                    if((x > 0 ? generator_array[x-1][y] == 1 : false)
+                    && (y > 0 ? generator_array[x][y-1] == 1 : false)
+                    && (x < x_dim - 1 ? generator_array[x][y+1] == 1 : false)
+                    && (y < y_dim - 1 ? generator_array[x+1][y] == 1 : false)) {
+                         generator_array[x][y] = 1;
+                    } else {
+                        generator_array[x][y] = 0;
+                    }
+                }
+            }
+
+            // Centers
+            for (let x = 1; x < x_dim; x+= 2) {
+                for (let y = 1; y < y_dim; y += 2) {
+                    let sum = 0;
+                    if (generator_array[x][y-1] == 1) sum += 1;
+                    if (generator_array[x+1][y-1] == 1) sum += 2;
+                    if (generator_array[x+1][y] == 1) sum += 4;
+                    if (generator_array[x+1][y+1] == 1) sum += 8;
+                    if (generator_array[x][y+1] == 1) sum += 16;
+                    if (generator_array[x-1][y+1] == 1) sum += 32;
+                    if (generator_array[x-1][y] == 1) sum += 64;
+                    if (generator_array[x-1][y-1] == 1) sum += 128;
+                    generator_array[x][y] = sum;
+                }
+            }
+
+            let final_array = new Array(x_size);
+            for (let x = 0; x < x_size; x++) {
+                final_array[x] = new Array(y_size);
+            }
+
+            for (let x = 0; x < x_size; x++) {
+                for (let y = 0; y < y_size; y++) {
+                    final_array[x][y] = generator_array[2*x+1][2*y+1];
+                }
+            }
+
+            return final_array;
+        }
+
+        prune_rooms = function(matrix, size) {
+            let x_size = matrix.length;
+            let y_size = matrix[0].length;
+            for (let x = 0; x < x_size; x++) {
+                for (let y = 0; y < y_size; y++) {
+                    if (matrix[x][y] != 1) {
+                        continue;
+                    }
+
+                    let room = [];
+                    let potential_rooms = [[x, y]];
+                    while (potential_rooms.length > 0) {
+                        let v = potential_rooms.pop();
+                        matrix[v[0]][v[1]] = 2;
+                        room.push(v);
+                        if (v[0] > 0 && matrix[v[0] - 1][v[1]] == 1) {
+                            potential_rooms.push([v[0] - 1, v[1]]);
+                        }
+                        if (v[1] > 0 && matrix[v[0]][v[1] - 1] == 1) {
+                            potential_rooms.push([v[0], v[1] - 1]);
+                        }
+                        if (v[0] < x_size - 1 && matrix[v[0] + 1][v[1]] == 1) {
+                            potential_rooms.push([v[0] + 1, v[1]]);
+                        }
+                        if (v[1] < y_size - 1 && matrix[v[0]][v[1] + 1] == 1) {
+                            potential_rooms.push([v[0], v[1] + 1]);
+                        }
+                    }
+                    if (room.length < size) {
+                        room.forEach(function(r) {
+                            matrix[r[0]][r[1]] = 0;
+                        });
+                    }
+                }
+            }
+            for (let x = 0; x < x_size; x++) {
+                for (let y = 0; y < y_size; y++) {
+                    if (matrix[x][y] == 2) matrix[x][y] = 1;
+                }
+            }
+            return matrix;
+        }
+
+        remove_pillars = function(matrix) {
+            let x_size = matrix.length;
+            let y_size = matrix[0].length;
+
+            let cleanup_list = [];
+
+            for (let x = 1; x < x_size - 1; x++) {
+                for (let y = 1; y < y_size - 1; y++) {
+                    if (matrix[x][y] == 0
+                    && matrix[x][y-1] == 1 
+                    && matrix[x+1][y-1] == 1
+                    && matrix[x+1][y] == 1
+                    && matrix[x+1][y+1] == 1
+                    && matrix[x][y+1] == 1
+                    && matrix[x-1][y+1] == 1
+                    && matrix[x-1][y] == 1
+                    && matrix[x-1][y-1] == 1) {
+                        cleanup_list.push([x, y]);
+                    }
+                }
+            }
+
+            cleanup_list.forEach(function(v) {
+                matrix[v[0]][v[1]] = 1;
+            });
+
+            return matrix;
+        }
+
+        draw_blob_matrix = function(directory, matrix, tile_size) {
+            let canvas = document.getElementById("blob_canvas");
+            canvas.width = tile_size * matrix.length;
+            canvas.height = tile_size * matrix[0].length;
+            let context = canvas.getContext("2d");
+
+            for (let x = 0; x < matrix.length; x++) {
+                for (let y = 0; y < matrix[x].length; y++) {
+                    let img = new Image;
+                    img.onload = function(){
+                        context.drawImage(img, x * tile_size, y * tile_size, tile_size, tile_size);
+                    }
+                    img.src = directory + matrix[x][y] + ".png";
+                    
+                }
+            }
+            
+        }
+
+        validate_blob_matrix = function(matrix) {
+            let x_size = matrix.length;
+            let y_size = matrix[0].length;
+            for (let x = 0; x < x_size; x++) {
+                if (y_size != matrix[x].length) {
+                    console.error("Uneven matrix dimensions");        
+                }
+                for (let y = 0; y < y_size; y++) {
+                    if (legal_blob_values.find((e) => e == matrix[x][y]) == undefined) {
+                        console.error("(" + x + "," + y + "): " + matrix[x][y] + " is illegal value");
+                    }
+                }
+            }
+        }
+
+        document.addEventListener('DOMContentLoaded', function(){
+
+   
+            tilesets.forEach(function(tileset){
+                let selector = document.getElementById("tileset_selector");
+                let button_container = document.createElement("li");
+                selector.appendChild(button_container);
+                let button = document.createElement("input");
+                button.onclick = function() {
+                    current_tile_set_dir = "./tilesets/" + tileset + "/";
+                }
+                button.type = "radio";
+                button.name = "tileset_selector";
+                button_container.appendChild(button);
+                let button_text = document.createElement("span");
+                button_text.innerText = tileset;
+                button_container.appendChild(button_text);
+            });
+
+            var current_tile_set_dir = "./tilesets/" + tilesets[0] + "/";
+            document.getElementById("tileset_selector").getElementsByTagName('li')[0].getElementsByTagName('input')[0].checked = true;
+
+            document.getElementById("generate_button").onclick = function() {
+                if (!document.getElementById("input-dim-x").checkValidity()) return false;
+                let width = document.getElementById("input-dim-x").value;
+                if (!document.getElementById("input-dim-y").checkValidity()) return false;
+                let height = document.getElementById("input-dim-y").value;
+                if (!document.getElementById("input-factor").checkValidity()) return false;
+                let factor = document.getElementById("input-factor").value;
+                if (!document.getElementById("input-min-room-size").checkValidity()) return false;
+                let min_room_size = document.getElementById("input-min-room-size").value;
+                let no_pillars = document.getElementById("input-no-pillars").checked;
+
+                let seed_matrix = generate_seed_matrix(width, height, factor);
+                seed_matrix = prune_rooms(seed_matrix, min_room_size);
+
+                if (no_pillars) {
+                    seed_matrix = remove_pillars(seed_matrix);
+                }
+
+                let matrix = generate_wang_blob(seed_matrix);
+
+                var img = new Image();
+                img.addEventListener("load", function(){
+                    draw_blob_matrix(current_tile_set_dir, matrix, this.naturalWidth);
+
+                    document.getElementById("export").style = "display:show;";
+
+                    document.getElementById("export").onclick = function() {
+                        this.href = document.getElementById("blob_canvas").toDataURL();
+                        this.download = "dungeon_map.png";
+                    }
+                });
+                img.src = current_tile_set_dir + "0.png";
+
+                
+            }
+
+            
+        });
+        
+    </script>
+</head>
+<body>
+    <div>
+        <div>
+            Dimensions 
+            <input id="input-dim-x" placeholder="Width" autocomplete="off" value="12" pattern="\d+" style="width: 3em;">
+            <input id="input-dim-y" placeholder="Height" autocomplete="off" value="12" pattern="\d+" style="width: 3em;">
+            Density factor
+            <input id="input-factor" placeholder="Factor" autocomplete="off" value="0.40" pattern="0\.\d+|\.\d+" style="width:4em;">
+            Minimum room size
+            <input id="input-min-room-size" placeholder="Minimum room size" autocomplete="off" value="8" pattern="\d+" style="width:3em;">
+            Remove pillars
+            <input id="input-no-pillars" type="checkbox" checked>
+        </div>
+        <ul id="tileset_selector">Tileset </ul>
+        <button id="generate_button">Generate</button>
+    </div>
+
+    <div>
+        <canvas id="blob_canvas" width="100px" height="100px"></canvas>
+    </div>
+
+    
+
+    <a id="export" style="display:none;">Save as image</a>
+
+    <p>
+        Read more about Wang tiles used to generate this map on <a href="http://www.cr31.co.uk/stagecast/wang/intro.html">http://www.cr31.co.uk/stagecast/wang</a>
+    </p>
+    
+</body>
+
+
