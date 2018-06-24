@@ -40,7 +40,7 @@
 
     </style>
     <script>
-        let tilesets = ["bw","cave", "metro"];
+        let tilesets = ["bw","cave", "metro", "house"];
         let legal_blob_values = [0, 85, 255,
                             1, 4, 16, 64,
                             5, 20, 80, 65,
@@ -353,6 +353,43 @@
             return current_room - 1;
         }
 
+        function squarify(matrix) {
+
+            let x_size = matrix.length;
+            let y_size = matrix[0].length;
+            let sq_matrix = new Array(x_size);
+            for (let x = 0; x < x_size; x++) {
+                sq_matrix[x] = new Array(y_size);
+            }
+
+            // Dilation
+            for (let x = 1; x < x_size - 1; x++) {
+                for (let y = 1; y < y_size - 1; y++) {
+                    
+
+                    if (matrix[x][y] == 0) {
+                        let n = matrix[x][y-1] == 1;
+                        let s = matrix[x][y+1] == 1;
+                        let e = matrix[x-1][y] == 1;
+                        let w = matrix[x+1][y] == 1;
+
+                        if ((n && e)
+                        || (n && w)
+                        || (s && e)
+                        || (s && w))
+                            sq_matrix[x][y] = 1;
+                        else {
+                            sq_matrix[x][y] = matrix[x][y];
+                        }
+                    } else {
+                        sq_matrix[x][y] = matrix[x][y];
+                    }
+                }
+            }
+
+            return sq_matrix;
+        }
+
         function connect_rooms(matrix) {
             let x_size = matrix.length;
             let y_size = matrix[0].length;
@@ -518,6 +555,8 @@
                 let enable_morph_opening = document.getElementById("input-morph-opening").checked;
                 let enable_connected_rooms = document.getElementById("input-connected").checked;
                 let enable_no_alcoves = document.getElementById("input-no-alcoves").checked;
+                if (!document.getElementById("input-squarify").checkValidity()) return false;
+                let squarify_level = document.getElementById("input-squarify").value;
                 
 
                 let seed_matrix = generate_seed_matrix(width, height, factor);
@@ -528,6 +567,12 @@
 
                 if (enable_no_alcoves) {
                     seed_matrix = remove_alcoves(seed_matrix);
+                }
+
+                if (squarify_level > 0) {
+                    for (let i = 0; i < squarify_level; i++) {
+                        seed_matrix = squarify(seed_matrix);
+                    }
                 }
 
                 prune_rooms(seed_matrix, min_room_size);
@@ -593,6 +638,10 @@
             <li>
                 Remove pillars
                 <input id="input-no-pillars" type="checkbox" checked>
+            </li>
+            <li>
+                Squarify level
+                <input id="input-squarify" placeholder="Level of squareness" autocomplete="off" value="0" pattern="\d+" style="width:3em;">
             </li>
             <li>
                 Connect rooms
