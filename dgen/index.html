@@ -222,6 +222,160 @@
             return matrix;
         }
 
+        morph_opening = function(matrix) {
+            let x_size = matrix.length;
+            let y_size = matrix[0].length;
+
+            let eroded_matrix = new Array(x_size);
+            for (let x = 0; x < x_size; x++) {
+                eroded_matrix[x] = new Array(y_size).fill(0);;
+            }
+
+            // Erosion
+            for (let x = 1; x < x_size - 1; x++) {
+                for (let y = 1; y < y_size - 1; y++) {
+                    if (matrix[x][y] == 0) continue;
+
+                    let edges = 0;
+                    if (matrix[x][y-1] == 0) edges++;
+                    if (matrix[x+1][y] == 0) edges++;
+                    if (matrix[x][y+1] == 0) edges++;
+                    if (matrix[x-1][y] == 0) edges++;
+
+                    if (edges == 1) {
+                        eroded_matrix[x][y] = 1;
+                    } else if (edges == 0) {
+                        eroded_matrix[x][y] = 2;
+                    }
+                }
+            }
+
+            let dilated_matrix = new Array(x_size);
+            for (let x = 0; x < x_size; x++) {
+                dilated_matrix[x] = new Array(y_size).fill(0);;
+            }
+
+            // Dilation
+            for (let x = 1; x < x_size - 1; x++) {
+                for (let y = 1; y < y_size - 1; y++) {
+                    if (eroded_matrix[x][y] > 0) {
+                        dilated_matrix[x][y-1] = 1;
+                        dilated_matrix[x+1][y] = 1;
+                        dilated_matrix[x][y+1] = 1;
+                        dilated_matrix[x-1][y] = 1;
+                    }
+                    if (eroded_matrix[x][y] == 2) {
+                        dilated_matrix[x+1][y-1] = 1;
+                        dilated_matrix[x+1][y+1] = 1;
+                        dilated_matrix[x-1][y+1] = 1;
+                        dilated_matrix[x-1][y-1] = 1;
+                    }
+                }
+            }
+
+            return dilated_matrix;
+        }
+
+        function connect_rooms(matrix) {
+            let x_size = matrix.length;
+            let y_size = matrix[0].length;
+            let current_room = 1;
+            let room_centers = [];
+            for (let x = 0; x < x_size; x++) {
+                for (let y = 0; y < y_size; y++) {
+                    if (matrix[x][y] != 1) {
+                        continue;
+                    }
+                    current_room++;
+
+                    let room = [];
+                    let potential_rooms = [[x, y]];
+                    while (potential_rooms.length > 0) {
+                        let v = potential_rooms.pop();
+                        matrix[v[0]][v[1]] = 2;
+                        room.push(v);
+                        if (v[0] > 0 && matrix[v[0] - 1][v[1]] == 1) {
+                            potential_rooms.push([v[0] - 1, v[1]]);
+                        }
+                        if (v[1] > 0 && matrix[v[0]][v[1] - 1] == 1) {
+                            potential_rooms.push([v[0], v[1] - 1]);
+                        }
+                        if (v[0] < x_size - 1 && matrix[v[0] + 1][v[1]] == 1) {
+                            potential_rooms.push([v[0] + 1, v[1]]);
+                        }
+                        if (v[1] < y_size - 1 && matrix[v[0]][v[1] + 1] == 1) {
+                            potential_rooms.push([v[0], v[1] + 1]);
+                        }
+                    }
+                    let room_center = [0, 0];
+                    room.forEach(function(r) {
+                        matrix[r[0]][r[1]] = current_room;
+                        room_center = [room_center[0] + r[0], room_center[1] + r[1]];
+                    });
+                    room_centers.push([room_center[0] / room.length, room_center[1] / room.length]);
+                }
+            }
+            for (let x = 0; x < x_size; x++) {
+                for (let y = 0; y < y_size; y++) {
+                    if (matrix[x][y] > 0) matrix[x][y] = 1;
+                }
+            }
+
+            if (room_centers.length == 0) return matrix;
+
+            let corridors = [];
+            for (let i = 0; i < room_centers.length; i++) {
+                let min_distance = Number.MAX_SAFE_INTEGER;
+                let min_arg = -1;
+                for (let j = 1; j < room_centers.length; j++) {
+                    if (i == j) continue;
+                    if (corridors.find(function(c){c[0] == j && c[1] == i}) != undefined) continue;
+
+                    let distance = (room_centers[i][0] - room_centers[j][0])**2 + (room_centers[i][1] - room_centers[j][1])**2
+                    if (distance < min_distance) {
+                        min_distance = distance;
+                        min_arg = j;
+                    }
+                }
+                if (min_arg == -1) continue;
+                corridors.push([i, min_arg]);
+
+            }
+            
+            
+            corridors.forEach(function(n) {
+                let start_x = Math.round(room_centers[n[0]][0]);
+                let start_y = Math.round(room_centers[n[0]][1]);
+                let end_x = Math.round(room_centers[n[1]][0]);
+                let end_y = Math.round(room_centers[n[1]][1]);
+
+                let x = start_x;
+                let y = start_y;
+
+                if (Math.random() > 0.5) {
+                    while (x != end_x) {
+                        x += Math.sign(end_x - start_x);
+                        matrix[x][y] = 1;
+                    }
+                    while (y != end_y) {
+                        y += Math.sign(end_y - start_y);
+                        matrix[x][y] = 1;
+                    }
+                } else {
+                    while (y != end_y) {
+                        y += Math.sign(end_y - start_y);
+                        matrix[x][y] = 1;
+                    }
+                    while (x != end_x) {
+                        x += Math.sign(end_x - start_x);
+                        matrix[x][y] = 1;
+                    }
+                }
+            });
+
+            return matrix;
+        }
+
         draw_blob_matrix = function(directory, matrix, tile_size) {
             let canvas = document.getElementById("blob_canvas");
             canvas.width = tile_size * matrix.length;
@@ -288,12 +442,24 @@
                 if (!document.getElementById("input-min-room-size").checkValidity()) return false;
                 let min_room_size = document.getElementById("input-min-room-size").value;
                 let no_pillars = document.getElementById("input-no-pillars").checked;
+                let enable_morph_opening = document.getElementById("input-morph-opening").checked;
+                let enable_connected_rooms = document.getElementById("input-connected").checked;
+                
 
                 let seed_matrix = generate_seed_matrix(width, height, factor);
+
+                if (enable_morph_opening) {
+                    seed_matrix = morph_opening(seed_matrix);
+                }
+
                 seed_matrix = prune_rooms(seed_matrix, min_room_size);
 
                 if (no_pillars) {
                     seed_matrix = remove_pillars(seed_matrix);
+                }
+
+                if(enable_connected_rooms) {
+                    seed_matrix = connect_rooms(seed_matrix);
                 }
 
                 let matrix = generate_wang_blob(seed_matrix);
@@ -326,11 +492,15 @@
             <input id="input-dim-x" placeholder="Width" autocomplete="off" value="12" pattern="\d+" style="width: 3em;">
             <input id="input-dim-y" placeholder="Height" autocomplete="off" value="12" pattern="\d+" style="width: 3em;">
             Density factor
-            <input id="input-factor" placeholder="Factor" autocomplete="off" value="0.40" pattern="0\.\d+|\.\d+" style="width:4em;">
+            <input id="input-factor" placeholder="Factor" autocomplete="off" value="0.50" pattern="0\.\d+|\.\d+" style="width:4em;">
             Minimum room size
             <input id="input-min-room-size" placeholder="Minimum room size" autocomplete="off" value="8" pattern="\d+" style="width:3em;">
+            Reduce noise
+            <input id="input-morph-opening" type="checkbox" checked>
             Remove pillars
             <input id="input-no-pillars" type="checkbox" checked>
+            Connect rooms
+            <input id="input-connected" type="checkbox" checked>
         </div>
         <ul id="tileset_selector">Tileset </ul>
         <button id="generate_button">Generate</button>
