@@ -32,6 +32,12 @@
             overflow: auto;
         }
 
+        h2 {
+            margin: 0em;
+            margin-top: 0.3em;
+            font-size: 14pt;
+        }
+
     </style>
     <script>
         let tilesets = ["bw","cave", "metro"];
@@ -561,6 +567,7 @@
 </head>
 <body>
     <div>
+        <h2>Settings</h2>
         <ul class="options">
             <li>
                 Dimensions 
@@ -580,7 +587,7 @@
                 <input id="input-morph-opening" type="checkbox" checked>
             </li>
             <li>
-                No alcoves
+                Remove alcoves
                 <input id="input-no-alcoves" type="checkbox" checked>
             </li>
             <li>
@@ -592,7 +599,8 @@
                 <input id="input-connected" type="checkbox" checked>
             </li>
         </ul>
-        <ul id="tileset_selector">Tileset </ul>
+        <h2>Tileset</h2>
+        <ul id="tileset_selector"></ul>
         <button id="generate_button">Generate</button>
     </div>
 
