@@ -25,7 +25,7 @@
             cursor: pointer;
         }
 
-        #tileset_selector {
+        #tileset_selector, .options {
             list-style: none;
             margin: 0;
             padding: 0;
@@ -561,23 +561,37 @@
 </head>
 <body>
     <div>
-        <div>
-            Dimensions 
-            <input id="input-dim-x" placeholder="Width" autocomplete="off" value="12" pattern="\d+" style="width: 3em;">
-            <input id="input-dim-y" placeholder="Height" autocomplete="off" value="12" pattern="\d+" style="width: 3em;">
-            Density factor
-            <input id="input-factor" placeholder="Factor" autocomplete="off" value="0.50" pattern="0\.\d+|\.\d+" style="width:4em;">
-            Minimum room size
-            <input id="input-min-room-size" placeholder="Minimum room size" autocomplete="off" value="8" pattern="\d+" style="width:3em;">
-            Reduce noise
-            <input id="input-morph-opening" type="checkbox" checked>
-            No alcoves
-            <input id="input-no-alcoves" type="checkbox" checked>
-            Remove pillars
-            <input id="input-no-pillars" type="checkbox" checked>
-            Connect rooms
-            <input id="input-connected" type="checkbox" checked>
-        </div>
+        <ul class="options">
+            <li>
+                Dimensions 
+                <input id="input-dim-x" placeholder="Width" autocomplete="off" value="12" pattern="\d+" style="width: 3em;">
+                <input id="input-dim-y" placeholder="Height" autocomplete="off" value="12" pattern="\d+" style="width: 3em;">
+            </li>
+            <li>
+                Density factor
+                <input id="input-factor" placeholder="Factor" autocomplete="off" value="0.50" pattern="0\.\d+|\.\d+" style="width:4em;">
+            </li>
+            <li>
+                Minimum room size
+                <input id="input-min-room-size" placeholder="Minimum room size" autocomplete="off" value="8" pattern="\d+" style="width:3em;">
+            </li>
+            <li>
+                Reduce noise
+                <input id="input-morph-opening" type="checkbox" checked>
+            </li>
+            <li>
+                No alcoves
+                <input id="input-no-alcoves" type="checkbox" checked>
+            </li>
+            <li>
+                Remove pillars
+                <input id="input-no-pillars" type="checkbox" checked>
+            </li>
+            <li>
+                Connect rooms
+                <input id="input-connected" type="checkbox" checked>
+            </li>
+        </ul>
         <ul id="tileset_selector">Tileset </ul>
         <button id="generate_button">Generate</button>
     </div>
