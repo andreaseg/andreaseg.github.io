@@ -486,23 +486,64 @@
             });
         }
 
+        function loadJSON(file, callback) {   
+            let xobj = new XMLHttpRequest();
+            xobj.overrideMimeType("application/json");
+            xobj.open('GET', file, true);
+            xobj.onreadystatechange = function () {
+                if (xobj.readyState == 4 && xobj.status == "200") {
+                    callback(JSON.parse(xobj.responseText));
+                }
+            };
+            xobj.send(null);  
+        }
+
         draw_blob_matrix = function(directory, matrix, tile_size) {
             let canvas = document.getElementById("blob_canvas");
             canvas.width = tile_size * matrix.length;
             canvas.height = tile_size * matrix[0].length;
             let context = canvas.getContext("2d");
 
-            for (let x = 0; x < matrix.length; x++) {
-                for (let y = 0; y < matrix[x].length; y++) {
-                    let img = new Image;
-                    img.onload = function(){
-                        context.drawImage(img, x * tile_size, y * tile_size, tile_size, tile_size);
+            loadJSON(directory + "data.json", function(json) {
+                alt_tiles = json["alt_tiles"];
+
+                for (let x = 0; x < matrix.length; x++) {
+                    for (let y = 0; y < matrix[x].length; y++) {
+                        let img = new Image;
+                        img.onload = function(){
+                            context.drawImage(img, x * tile_size, y * tile_size, tile_size, tile_size);
+                        }
+                        if (matrix[x][y] in alt_tiles) {
+
+                            let weights = [1];
+                            let weight_sum = 1;
+                            alt_tiles[matrix[x][y]].forEach(function(e) {
+                                weights.push(e.weight);
+                                weight_sum += e.weight;
+                            });
+                            let random_weight = weight_sum * Math.random();
+                            let weight_iterator = 0;
+                            let weight_index = -1;
+                            for (let i = 0; i < weights.length; i++) {
+                                weight_iterator += weights[i];
+                                if (random_weight <= weight_iterator) {
+                                    weight_index = i;
+                                    break;
+                                }
+                            }
+                            if (weight_index == 0) {
+                                img.src = directory + matrix[x][y] + ".png";
+                            } else {
+                                img.src = directory + alt_tiles[matrix[x][y]][weight_index - 1].src + ".png";
+                            }
+                        } else {
+                            img.src = directory + matrix[x][y] + ".png";
+                        }
+                        
+                        
                     }
-                    img.src = directory + matrix[x][y] + ".png";
-                    
                 }
-            }
-            
+            });
         }
 
         validate_blob_matrix = function(matrix) {

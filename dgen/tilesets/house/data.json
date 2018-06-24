@@ -1,0 +1,12 @@
+{
+    "alt_tiles": 
+        {"0": [
+            {"src": "alt/flower", "weight": 0.2},
+            {"src": "alt/flower2", "weight": 0.1},
+            {"src": "alt/sheep", "weight": 0.01}
+        ],
+        "124": [
+            {"src": "alt/124-window", "weight": 0.3}
+        ]
+    }
+}
