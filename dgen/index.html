@@ -273,6 +273,38 @@
             return dilated_matrix;
         }
 
+        function remove_alcoves(matrix) {
+            let x_size = matrix.length;
+            let y_size = matrix[0].length;
+            let no_alcoves_matrix = new Array(x_size);
+            for (let x = 0; x < x_size; x++) {
+                no_alcoves_matrix[x] = new Array(y_size).fill(0);;
+            }
+
+            // Erosion
+            for (let x = 1; x < x_size - 1; x++) {
+                for (let y = 1; y < y_size - 1; y++) {
+                    if (matrix[x][y] == 0) continue;
+
+                    let edges = 0;
+                    if (matrix[x][y-1] == 0) edges++;
+                    if (matrix[x+1][y] == 0) edges++;
+                    if (matrix[x][y+1] == 0) edges++;
+                    if (matrix[x-1][y] == 0) edges++;
+
+                    if (edges == 3
+                    || (matrix[x][y-1] == 0 && matrix[x][y+1] == 0)
+                    || (matrix[x+1][y] == 0 && matrix[x-1][y] == 0)) {
+                        no_alcoves_matrix[x][y] = 0;
+                    } else {
+                        no_alcoves_matrix[x][y] = matrix[x][y];
+                    }
+                }
+            }
+
+            return no_alcoves_matrix;
+        }
+
         function count_rooms(matrix) {
             let x_size = matrix.length;
             let y_size = matrix[0].length;
@@ -479,6 +511,7 @@
                 let no_pillars = document.getElementById("input-no-pillars").checked;
                 let enable_morph_opening = document.getElementById("input-morph-opening").checked;
                 let enable_connected_rooms = document.getElementById("input-connected").checked;
+                let enable_no_alcoves = document.getElementById("input-no-alcoves").checked;
                 
 
                 let seed_matrix = generate_seed_matrix(width, height, factor);
@@ -487,11 +520,11 @@
                     seed_matrix = morph_opening(seed_matrix);
                 }
 
-                prune_rooms(seed_matrix, min_room_size);
-
-                if (no_pillars) {
-                    remove_pillars(seed_matrix);
+                if (enable_no_alcoves) {
+                    seed_matrix = remove_alcoves(seed_matrix);
                 }
+
+                prune_rooms(seed_matrix, min_room_size);
 
                 if(enable_connected_rooms) {
                     while (count_rooms(seed_matrix) > 1) {
@@ -499,9 +532,13 @@
                     }
                 }
 
+                if (no_pillars) {
+                    remove_pillars(seed_matrix);
+                }
+
                 let matrix = generate_wang_blob(seed_matrix);
 
-                var img = new Image();
+                let img = new Image();
                 img.addEventListener("load", function(){
                     draw_blob_matrix(current_tile_set_dir, matrix, this.naturalWidth);
 
@@ -534,6 +571,8 @@
             <input id="input-min-room-size" placeholder="Minimum room size" autocomplete="off" value="8" pattern="\d+" style="width:3em;">
             Reduce noise
             <input id="input-morph-opening" type="checkbox" checked>
+            No alcoves
+            <input id="input-no-alcoves" type="checkbox" checked>
             Remove pillars
             <input id="input-no-pillars" type="checkbox" checked>
             Connect rooms
