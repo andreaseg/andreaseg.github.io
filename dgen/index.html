@@ -55,7 +55,7 @@
                             17, 68, 119, 221];
 
 
-        generate_seed_matrix = function(x_size, y_size, factor) {
+        function generate_seed_matrix(x_size, y_size, factor) {
             let seed_matrix = new Array(x_size);
             for (let x = 0; x < x_size; x++) {
                 seed_matrix[x] = new Array(y_size);
@@ -71,7 +71,7 @@
         }
         
 
-        generate_wang_blob = function(seed_matrix) {
+        function generate_wang_blob(seed_matrix) {
             let x_size = seed_matrix.length;
             let y_size = seed_matrix[0].length;
             let x_dim = 2 * x_size + 1;
@@ -156,7 +156,7 @@
             return final_array;
         }
 
-        prune_rooms = function(matrix, size) {
+        function prune_rooms(matrix, size) {
             let x_size = matrix.length;
             let y_size = matrix[0].length;
             for (let x = 0; x < x_size; x++) {
@@ -198,7 +198,7 @@
             }
         }
 
-        remove_pillars = function(matrix) {
+        function remove_pillars(matrix) {
             let x_size = matrix.length;
             let y_size = matrix[0].length;
 
@@ -225,7 +225,7 @@
             });
         }
 
-        morph_opening = function(matrix) {
+        function morph_opening(matrix) {
             let x_size = matrix.length;
             let y_size = matrix[0].length;
 
@@ -498,7 +498,7 @@
             xobj.send(null);  
         }
 
-        draw_blob_matrix = function(directory, matrix, tile_size) {
+        function draw_blob_matrix(directory, matrix, tile_size) {
             let canvas = document.getElementById("blob_canvas");
             canvas.width = tile_size * matrix.length;
             canvas.height = tile_size * matrix[0].length;
@@ -546,7 +546,7 @@
             });
         }
 
-        validate_blob_matrix = function(matrix) {
+        function validate_blob_matrix(matrix) {
             let x_size = matrix.length;
             let y_size = matrix[0].length;
             for (let x = 0; x < x_size; x++) {
