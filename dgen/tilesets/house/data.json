@@ -7,6 +7,9 @@
         ],
         "124": [
             {"src": "alt/124-window", "weight": 0.3}
+        ],
+        "255": [
+            {"src": "alt/table", "weight": 0.3}
         ]
     }
 }

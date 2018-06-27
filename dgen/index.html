@@ -561,6 +561,10 @@
             }
         }
 
+        function rescale_scale_slider(slider_value) {
+            return Math.pow(2, slider_value);
+        }
+
         document.addEventListener('DOMContentLoaded', function(){
 
    
@@ -598,6 +602,8 @@
                 let enable_no_alcoves = document.getElementById("input-no-alcoves").checked;
                 if (!document.getElementById("input-squarify").checkValidity()) return false;
                 let squarify_level = document.getElementById("input-squarify").value;
+                if (!document.getElementById("input-scale").checkValidity()) return false;
+                let scale = rescale_scale_slider(document.getElementById("input-scale").value);
                 
 
                 let seed_matrix = generate_seed_matrix(width, height, factor);
@@ -619,8 +625,12 @@
                 prune_rooms(seed_matrix, min_room_size);
 
                 if(enable_connected_rooms) {
-                    while (count_rooms(seed_matrix) > 1) {
+                    let last_count = -1;
+                    let current_count = count_rooms(seed_matrix);
+                    while (current_count > 1 && current_count != last_count) {
                         connect_rooms(seed_matrix);
+                        last_count = current_count;
+                        current_count = count_rooms(seed_matrix)
                     }
                 }
 
@@ -632,7 +642,7 @@
 
                 let img = new Image();
                 img.addEventListener("load", function(){
-                    draw_blob_matrix(current_tile_set_dir, matrix, this.naturalWidth);
+                    draw_blob_matrix(current_tile_set_dir, matrix, this.naturalWidth * scale);
 
                     document.getElementById("export").style = "display:show;";
 
@@ -688,6 +698,12 @@
                 Connect rooms
                 <input id="input-connected" type="checkbox" checked>
             </li>
+            <li>
+                Scale
+                <input id="input-scale" type="range" value="0" min="-2" max="2" step="1" oninput="document.getElementById('input-scale-display').innerText = rescale_scale_slider(this.value);">
+                <output id="input-scale-display">1.0</output>
+            </li>
+
         </ul>
         <h2>Tileset</h2>
         <ul id="tileset_selector"></ul>
