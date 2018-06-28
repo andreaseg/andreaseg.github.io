@@ -29,13 +29,54 @@
             list-style: none;
             margin: 0;
             padding: 0;
-            overflow: auto;
         }
 
         h2 {
             margin: 0em;
             margin-top: 0.3em;
             font-size: 14pt;
+        }
+
+        .options > li {
+            display: table;
+         }
+
+        .tooltip {
+            position: relative;
+            border-bottom: 1px dotted black;
+        }
+
+        .tooltip .tooltiptext {
+            visibility: hidden;
+            width: 14em;
+            background-color: #555;
+            color: #fff;
+            text-align: center;
+            border-radius: 6px;
+            padding: 0.5em;
+            position: absolute;
+            z-index: 1;
+            top: -.5em;
+            left: calc(100% + 2em);
+            margin-left: -10px;
+            opacity: 0;
+            transition: opacity 0.3s;
+        }
+
+        .tooltip .tooltiptext::after {
+            content: "";
+            position: absolute;
+            right: 100%;
+            top: 0.8em;
+            margin-left: -5px;
+            border-width: 5px;
+            border-style: solid;
+            border-color: transparent #555 transparent transparent;
+        }
+
+        .tooltip:hover .tooltiptext {
+            visibility: visible;
+            opacity: 1;
         }
 
     </style>
@@ -573,14 +614,17 @@
                 let button_container = document.createElement("li");
                 selector.appendChild(button_container);
                 let button = document.createElement("input");
+                let directory = "./tilesets/" + tileset + "/"
                 button.onclick = function() {
-                    current_tile_set_dir = "./tilesets/" + tileset + "/";
+                    current_tile_set_dir = directory;
                 }
                 button.type = "radio";
                 button.name = "tileset_selector";
                 button_container.appendChild(button);
                 let button_text = document.createElement("span");
-                button_text.innerText = tileset;
+                loadJSON(directory + "data.json", function(json) {
+                    button_text.innerText = json["name"];
+                });
                 button_container.appendChild(button_text);
             });
 
@@ -665,43 +709,52 @@
     <div>
         <h2>Settings</h2>
         <ul class="options">
-            <li>
-                Dimensions 
+            <li class="tooltip">
+                Dimensions
                 <input id="input-dim-x" placeholder="Width" autocomplete="off" value="12" pattern="\d+" style="width: 3em;">
                 <input id="input-dim-y" placeholder="Height" autocomplete="off" value="12" pattern="\d+" style="width: 3em;">
+                <span class="tooltiptext">The number of tiles given in width and height for the map.</span>
             </li>
-            <li>
+            <li class="tooltip">
                 Density factor
                 <input id="input-factor" placeholder="Factor" autocomplete="off" value="0.50" pattern="0\.\d+|\.\d+" style="width:4em;">
+                <span class="tooltiptext">Determines the fraction of open or closed tiles for the map before any further transformations. A high factor produces a sparse map. A low factor produces a open map.</span>
             </li>
-            <li>
+            <li class="tooltip">
                 Minimum room size
                 <input id="input-min-room-size" placeholder="Minimum room size" autocomplete="off" value="8" pattern="\d+" style="width:3em;">
+                <span class="tooltiptext">Checks the size of each room on the map and removes any rooms below the threshold</span>
             </li>
-            <li>
+            <li class="tooltip">
                 Reduce noise
                 <input id="input-morph-opening" type="checkbox" checked>
+                <span class="tooltiptext">Performs morphological opening, removing many small features, while preserving large features. Results in a less chaotic map.</span>
             </li>
-            <li>
+            <li class="tooltip"> 
                 Remove alcoves
                 <input id="input-no-alcoves" type="checkbox" checked>
+                <span class="tooltiptext">Removes any open tiles with at least three edges facing closed tiles.</span>
             </li>
-            <li>
+            <li class="tooltip">
                 Remove pillars
                 <input id="input-no-pillars" type="checkbox" checked>
+                <span class="tooltiptext">Removes any closed tiles completly surrounded by open tiles.</span>
             </li>
-            <li>
+            <li class="tooltip">
                 Squarify level
                 <input id="input-squarify" placeholder="Level of squareness" autocomplete="off" value="0" pattern="\d+" style="width:3em;">
+                <span class="tooltiptext">For each level will perform one iteration of dilation, making any closed tile with a corner surrounded by two open tiles into a open tile.</span>
             </li>
-            <li>
+            <li class="tooltip">
                 Connect rooms
                 <input id="input-connected" type="checkbox" checked>
+                <span class="tooltiptext">Will attempt to connect the centers of the rooms to each other if they are not already connected.</span>
             </li>
-            <li>
+            <li class="tooltip">
                 Scale
                 <input id="input-scale" type="range" value="0" min="-2" max="2" step="1" oninput="document.getElementById('input-scale-display').innerText = rescale_scale_slider(this.value);">
                 <output id="input-scale-display">1.0</output>
+                <span class="tooltiptext">Adjusts scale of output-image, scale will allways be a factor of two and nearest-neighbour interpolation is used.</span>
             </li>
 
         </ul>

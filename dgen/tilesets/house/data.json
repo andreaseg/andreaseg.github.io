@@ -1,4 +1,5 @@
 {
+    "name": "Mansion",
     "alt_tiles": 
         {"0": [
             {"src": "alt/flower", "weight": 0.2},
