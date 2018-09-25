@@ -1,0 +1,315 @@
+<head>
+    <meta charset="UTF-8">
+    <style>
+        html, body {
+            overflow: hidden;
+        }
+        canvas {
+            position:fixed;
+            left:0;
+            top:0;
+            width:100%;
+            height:100%;
+        }
+    </style>
+    <script src="../webgl-utils.js"></script>
+    <script src="../J3DI.js"></script>
+    <script id="vshader" type="x-shader/x-vertex">
+
+        attribute vec2 aPos;
+        varying vec2 uv;
+
+        void main() {
+            gl_Position = vec4(2.0 * aPos.x - 1.0, 2.0 * aPos.y - 1.0, 0.0, 1.0);
+            uv = aPos.xy;
+        }
+
+    </script>
+    <script id="fshader" type="x-shader/x-fragment">
+
+        precision mediump float;
+
+        varying vec2 uv;
+
+        uniform sampler2D cubemap_top;
+        uniform sampler2D cubemap_bottom;
+        uniform sampler2D cubemap_left;
+        uniform sampler2D cubemap_right;
+        uniform sampler2D cubemap_front;
+        uniform sampler2D cubemap_back;
+
+        uniform float aspect_ratio;
+
+        struct sphere {
+            vec3 pos;
+            float r;
+            vec4 color;
+        };
+
+        struct ray {
+            vec3 pos;
+            vec3 dir;
+        };
+
+        const int N_BOUNCES = 3;
+        const int N_SPHERES = 2;
+        uniform sphere spheres[N_SPHERES];
+
+        float intersect(sphere sphere, ray ray) {
+            vec3 delta_pos = ray.pos - sphere.pos;
+            float dot_delta_pos =dot(ray.dir, delta_pos);
+            float under_root = dot_delta_pos*dot_delta_pos - dot(delta_pos,delta_pos) + sphere.r*sphere.r;
+            if (under_root < 0.0) {
+                return -1.0;
+            } else {
+                float a = -dot_delta_pos;
+                float b = sqrt(under_root);
+                return min(a + b, a - b);
+            }
+        }
+
+        vec2 get_sphere_uv(sphere sphere, ray ray, float time) {
+            vec3 intersect = ray.pos + time * ray.dir - sphere.pos;
+            float phi = atan(intersect.z, intersect.x)/3.14159265359 + 1.0;
+            float theta = acos(intersect.y / sphere.r)/3.14159265359;
+            return vec2(phi, theta);
+        }
+
+        vec3 get_sphere_normal(sphere sphere, ray ray, float time) {
+            return normalize(ray.pos + time * ray.dir - sphere.pos);
+        }
+
+        vec3 lens_ray(vec2 pos) {
+            return normalize(vec3(0.0, -0.5, 0.0)+vec3(vec2(aspect_ratio, 1.0) * pos.xy * 1.0, 1.0));
+        }
+
+        vec4 cube_sampler(vec3 dir) {
+            float x = dir.x * dir.x;
+            float y = dir.y * dir.y;
+            float z = dir.z * dir.z;
+            float max = sqrt(max(x, max(y, z)));
+            vec3 uv = 0.5*(dir/max + 1.0);
+            if (x > y && x > z) {
+                if (dir.x > 0.0) {
+                    return texture2D(cubemap_left, vec2(1.0-uv.z, 1.0-uv.y));
+                } else {
+                    return texture2D(cubemap_right, vec2(uv.z, 1.0-uv.y));
+                }
+            } else if (y > x && y > z) {
+                if (dir.y > 0.0) {
+                    return texture2D(cubemap_top, vec2(1.0-uv.x, 1.0-uv.z));
+                } else {
+                    return texture2D(cubemap_bottom, vec2(1.0-uv.x, uv.z));
+                }
+            } else { // z
+                if (dir.z > 0.0) {
+                    return texture2D(cubemap_back, vec2(uv.x, 1.0-uv.y));
+                } else {
+                    return texture2D(cubemap_front, vec2(1.0-uv.x, 1.0-uv.y));
+                }
+            }
+        }
+
+        void main() {
+            vec3 lightDir = vec3(0.0, 1.0, 0.1);
+
+            ray ray = ray(vec3(0.0, 0.5, -1.3), lens_ray(2.0*uv-1.0));
+            vec4 color_acc = vec4(0.0);
+            for (int i = 0; i < N_BOUNCES; i++) {
+                float t = -1.0;
+                sphere sphere;
+                for (int j = 0; j < N_SPHERES; j++) {
+                    t = intersect(spheres[j], ray);
+                    if (t > 0.0) {
+                        sphere = spheres[j];
+
+                        vec3 normal = get_sphere_normal(sphere, ray, t);
+                        float diffuse = (clamp(dot(normal,lightDir), 0.0, 1.0) + 0.3) / 1.3;
+                        vec3 half_vector = normalize(-lightDir + ray.dir);
+                        float specular = pow(dot(normal, half_vector), 64.0);
+
+                        vec3 reflect_pos = ray.pos + t * ray.dir;
+                        vec3 reflect_dir = ray.dir - 2.0 * dot(ray.dir, normal) * normal;
+                        ray.pos = reflect_pos;
+                        ray.dir = reflect_dir;
+                        color_acc = color_acc * color_acc.w 
+                            + (1.0 - color_acc.w)
+                            * sphere.color.w
+                            * (vec4(sphere.color.xyz, 1.0) * diffuse)
+                            + vec4(1.0) * specular;
+                    }
+                }
+                if (t <= 0.0) {
+                    color_acc = color_acc * color_acc.w 
+                        + (1.0 - color_acc.w)
+                        * cube_sampler(ray.dir);
+                }
+            }
+
+            gl_FragColor = vec4(color_acc.xyz, 1.0);
+            
+            //gl_FragColor = vec4(uv.x, uv.y, 0.0, 1.0);
+            //gl_FragColor = texture2D(sampler2d, get_sphere_uv(left_sphere, ray, t));
+        }
+
+    </script>
+    <script>
+        var mesh;
+        var program;
+        var requestId;
+        var textures = [];
+        var texture_loc = [];
+        var u_aspect_ratio;
+
+        function Mesh(ctx) {
+            let uv = new Float32Array([0,0, 1,0, 1,1, 0,1]);
+            let indices = new Uint8Array([0,1,2, 0,2,3]);
+
+            this.uv = ctx.createBuffer();
+            ctx.bindBuffer(ctx.ARRAY_BUFFER, this.uv);
+            ctx.bufferData(ctx.ARRAY_BUFFER, uv, ctx.STATIC_DRAW);
+
+            this.indices = ctx.createBuffer();
+            ctx.bindBuffer(ctx.ELEMENT_ARRAY_BUFFER, this.indices);
+            ctx.bufferData(ctx.ELEMENT_ARRAY_BUFFER, indices, ctx.STATIC_DRAW);
+
+            ctx.bindBuffer(ctx.ELEMENT_ARRAY_BUFFER, null);
+
+            this.length = indices.length;
+        }
+
+        function u_sphere(pos, r, color) {
+            this.pos = pos;
+            this.r = r;
+            this.color = color;
+        }
+
+        function init() {
+            var gl = initWebGL("example");
+            if (!gl) {
+                return;
+            }
+
+            mesh = new Mesh(gl)
+
+            program = simpleSetup(
+                    gl, "vshader", "fshader", 
+                    [ "aPos" ], [ 0, 0, 0, 1 ], 10000);
+
+            textures.push(loadImageTexture(gl, "top.png"));
+            textures.push(loadImageTexture(gl, "bottom.png"));
+            textures.push(loadImageTexture(gl, "left.png"));
+            textures.push(loadImageTexture(gl, "right.png"));
+            textures.push(loadImageTexture(gl, "front.png"));
+            textures.push(loadImageTexture(gl, "back.png"));
+
+            texture_loc.push(gl.getUniformLocation(program, "cubemap_top"));
+            texture_loc.push(gl.getUniformLocation(program, "cubemap_bottom"));
+            texture_loc.push(gl.getUniformLocation(program, "cubemap_left"));
+            texture_loc.push(gl.getUniformLocation(program, "cubemap_right"));
+            texture_loc.push(gl.getUniformLocation(program, "cubemap_front"));
+            texture_loc.push(gl.getUniformLocation(program, "cubemap_back"));
+
+            u_aspect_ratio = gl.getUniformLocation(program, "aspect_ratio");
+            gl.uniform1f(u_aspect_ratio, gl.width / gl.height);
+
+            let spheres = [
+                new u_sphere([-0.5, 0.0, 0.0], 0.3, [1.0, 0.0, 0.0, 0.9]),
+                new u_sphere([0.5, 0.0, 0.0], 0.3, [0.0, 0.0, 1.0, 0.5])
+            ];
+
+            for (i = 0; i < 2; i++) {
+                let u_sphere_pos = gl.getUniformLocation(program, "spheres["+i+"].pos");
+                let u_sphere_r = gl.getUniformLocation(program, "spheres["+i+"].r");
+                let u_sphere_color = gl.getUniformLocation(program, "spheres["+i+"].color");
+
+                gl.uniform3fv(u_sphere_pos, spheres[i].pos);
+                gl.uniform1f(u_sphere_r, spheres[i].r);
+                gl.uniform4fv(u_sphere_color, spheres[i].color);
+            }
+
+            gl.enableVertexAttribArray(0);
+
+            gl.bindBuffer(gl.ARRAY_BUFFER, mesh.uv);
+            gl.vertexAttribPointer(0, 2, gl.FLOAT, false, 0, 0);
+
+            gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, mesh.indices);
+
+            return gl;
+        }
+
+        function reshape(gl) {
+            var canvas = document.getElementById('example');
+            if (canvas.clientWidth == canvas.width && canvas.clientHeight == canvas.height) {
+                return;
+            }
+
+            canvas.width = canvas.clientWidth;
+            canvas.height = canvas.clientHeight;
+
+            gl.uniform1f(u_aspect_ratio, canvas.width / canvas.height);
+
+            gl.viewport(0, 0, canvas.clientWidth, canvas.clientHeight);
+        }
+
+        function drawPicture(gl) {
+            reshape(gl);
+
+            gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
+
+            gl.activeTexture(gl.TEXTURE0);
+            gl.bindTexture(gl.TEXTURE_2D, textures[0]);
+            gl.uniform1i(texture_loc[0], 0);
+            gl.activeTexture(gl.TEXTURE1);
+            gl.bindTexture(gl.TEXTURE_2D, textures[1]);
+            gl.uniform1i(texture_loc[1], 1);
+            gl.activeTexture(gl.TEXTURE2);
+            gl.bindTexture(gl.TEXTURE_2D, textures[2]);
+            gl.uniform1i(texture_loc[2], 2);
+            gl.activeTexture(gl.TEXTURE3);
+            gl.bindTexture(gl.TEXTURE_2D, textures[3]);
+            gl.uniform1i(texture_loc[3], 3);
+            gl.activeTexture(gl.TEXTURE4);
+            gl.bindTexture(gl.TEXTURE_2D, textures[4]);
+            gl.uniform1i(texture_loc[4], 4);
+            gl.activeTexture(gl.TEXTURE5);
+            gl.bindTexture(gl.TEXTURE_2D, textures[5]);
+            gl.uniform1i(texture_loc[5], 5);
+
+            gl.drawElements(gl.TRIANGLES, mesh.length, gl.UNSIGNED_BYTE, 0);
+        }
+
+        function start() {
+            var ctx = document.getElementById("example");
+            init();
+
+            var loop = function() {
+                drawPicture(gl);
+                requestId = window.requestAnimFrame(loop, ctx);
+            };
+            loop();
+
+            function handleContextLost(e) {
+                e.preventDefault();
+                clearLoadingImages();
+                if (requestId !== undefined) {
+                    window.cancelAnimFrame(requestId);
+                    requestId = undefined;
+                }
+            }
+
+            function handleContextRestored() {
+                init();
+                loop();
+            }
+
+            ctx.addEventListener('webglcontextlost', handleContextLost, false);
+            ctx.addEventListener('webglcontextrestored', handleContextRestored, false);
+        }
+    </script>
+</head>
+<body onload="start()">
+    <canvas id="example">
+        If you're seeing this your web browser doesn't support the &lt;canvas>&gt; element. Ouch!
+    </canvas>
+</body>
