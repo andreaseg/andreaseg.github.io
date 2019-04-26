@@ -9,6 +9,9 @@ let colorAreas = [["primary", ''],
     ["text-background", "F0F0F0"],
     ["background", "FFFFFF"]];
 
+let activeColor = '';
+let colorPicker = '';
+
 function setStyle(sheetName) {
     document.getElementById("stylesheet").href=sheetName;
 }
@@ -55,8 +58,18 @@ function onLoadComplete(event) {
             }
             if(elem.value.length == 6) {
                 val[1] = elem.value;
+                colorPicker.color.hexString = '#' + elem.value;
                 setPalette();
             }
+        });
+        elem.addEventListener("focus", event => {
+            activeColor = val;
+            colorPicker.color.hexString = '#' + elem.value;
+            document.getElementById("color-picker-container").style.display = "block";
+        });
+        elem.addEventListener("blur", event => {
+            activeColor = '';
+            document.getElementById("color-picker-container").style.display = "none";
         });
     });
 
@@ -80,4 +93,14 @@ function onLoadComplete(event) {
         elem.innerText = "Praesent interdum felis lacus, ut venenatis libero aliquam nec. Class aptent taciti sociosqu ad litora torquent per conubia nostra, per inceptos himenaeos. Morbi quis urna quis ipsum rhoncus eleifend. Aliquam sodales rutrum ante quis pretium. Etiam dictum dictum consequat. Suspendisse ut elit blandit, interdum erat vitae, porttitor felis."
     });
     
+    colorPicker = new window.iro.ColorPicker('#color-picker-container', {width: 160});
+    colorPicker.color.hexString = '#' + document.getElementById(colorAreas[0][0]).value;
+
+    colorPicker.on('color:change', (color, change) => {
+        let elem = document.getElementById(activeColor[0]);
+        let hex = colorPicker.color.hexString.substring(1,7);
+        elem.value = hex;
+        activeColor[1] = hex;
+        setPalette();
+    });
 }

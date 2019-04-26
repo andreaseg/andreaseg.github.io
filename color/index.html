@@ -6,6 +6,7 @@
     <link href="https://fonts.googleapis.com/css?family=Cinzel|Lobster|Montserrat|PT+Serif" rel="stylesheet"> 
     <link rel="stylesheet" id="stylesheet">
     <style id="color-stylesheet"></style>
+    <script src="iro.min.js"></script>
     <style>
         #overlay {
             position: fixed;
@@ -37,6 +38,12 @@
         #color-picker {
             font-family: "Lucida Console", Monaco, monospace;
         }
+
+        #color-picker-container {
+            display:none;
+            margin-top: 10pt;
+            margin-bottom: 10pt;
+        }
     </style>
     <script type="text/javascript" src="script.js"></script>
 </head>
@@ -55,6 +62,7 @@
             <span class="color-preview text-background-bg"></span><br />
             Background <br /> <input name="background" id="background">
             <span class="color-preview background-bg"></span> <br />
+            <div id="color-picker-container"></div>
         </span>
         <span id="style-picker"></span>
     </span>
