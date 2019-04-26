@@ -1,4 +1,6 @@
-
+.content {
+    font-family: 'Montserrat', sans-serif;
+}
 header {
     grid-area: hd;
     font-size: 30pt;
