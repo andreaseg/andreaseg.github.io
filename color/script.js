@@ -103,9 +103,11 @@ function onLoadComplete(event) {
 
     colorPicker.on('color:change', (color, change) => {
         let elem = document.getElementById(activeColor[0]);
-        let hex = colorPicker.color.hexString.substring(1,7);
-        elem.value = hex;
-        activeColor[1] = hex;
+        let hex = colorPicker.color.hexString.substring(1,7).toUpperCase();
+        if (hex != elem.value.toUpperCase()) {
+            elem.value = hex;
+            activeColor[1] = hex;
+        }
         setPalette();
     });
 }
