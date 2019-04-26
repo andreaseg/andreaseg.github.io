@@ -71,6 +71,11 @@ function onLoadComplete(event) {
             activeColor = '';
             document.getElementById("color-picker-container").style.display = "none";
         });
+
+        let colorPreview = elem.nextSibling.nextSibling;
+        colorPreview.addEventListener("click", event => {
+            elem.focus();
+        });
     });
 
     setStyle(styleNameToFileName(styles[0]));
