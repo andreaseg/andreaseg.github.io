@@ -27,18 +27,30 @@
         body {
             margin: 0;
         }
+
+        .color-preview {
+            padding-right: 1em;
+            margin-left: 0.5em;
+            border: solid thin black;
+        }
     </style>
     <script type="text/javascript" src="script.js"></script>
 </head>
 <body class="background-bg">
     <span id="overlay">
         <span id="color-picker">
-            Primary <br /> <input name="primary" id="primary" maxlength="6"> <br />
-            Secondary <br /> <input name="secondary" id="secondary" maxlength="6"> <br />
-            Accents <br /> <input name="accent" id="accent" maxlength="6"> <br />
-            Text <br /> <input name="text" id="text" maxlength="6"> <br />
-            Text Background <br /> <input name="text-background" id="text-background" maxlength="6"> <br />
-            Background <br /> <input name="background" id="background" maxlength="6"> <br />
+            Primary <br /> <input name="primary" id="primary" maxlength="6">
+            <span class="color-preview primary-bg"></span><br />
+            Secondary <br /> <input name="secondary" id="secondary" maxlength="6">
+            <span class="color-preview secondary-bg"></span><br />
+            Accents <br /> <input name="accent" id="accent" maxlength="6">
+            <span class="color-preview accent-bg"></span><br />
+            Text <br /> <input name="text" id="text" maxlength="6">
+            <span class="color-preview text-bg"></span><br />
+            Text Background <br /> <input name="text-background" id="text-background" maxlength="6">
+            <span class="color-preview text-background-bg"></span><br />
+            Background <br /> <input name="background" id="background" maxlength="6">
+            <span class="color-preview background-bg"></span> <br />
         </span>
         <span id="style-picker"></span>
     </span>
