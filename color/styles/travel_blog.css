@@ -1,0 +1,46 @@
+body {
+    font-family: 'Montserrat', sans-serif;
+}
+header {
+    grid-area: hd;
+    font-size: 40pt;
+    border-bottom: solid;
+    font-family: 'Lobster', cursive;
+}
+footer {
+    grid-area: ft;
+}
+main {
+    grid-area: main;
+    padding: 3pt;
+}
+h1 {
+    margin: 0;
+    padding: 0;
+}
+img {
+    grid-area: i;
+    object-fit: cover;
+    width: 100%;
+}
+.sidebar {
+    grid-area: sd;
+    margin: 0;
+    padding-left: 6pt;
+    list-style: none;
+}
+
+.content {
+    max-width: 800pt;
+    margin: auto;
+    display: none;
+    grid-template-columns: 130pt auto 300pt;
+    grid-template-areas: 
+      "hd hd hd"
+      "sd main i"
+      "sd ft ft";
+}
+
+.travel {
+    display: grid;
+}

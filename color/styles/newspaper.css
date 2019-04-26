@@ -1,0 +1,62 @@
+body {
+    font-family: 'PT Serif', serif;
+}
+header {
+    grid-area: hd;
+    font-size: 40pt;
+    border-bottom: solid;
+    text-align: center;
+    font-family: 'Cinzel', serif;
+}
+h1 {
+    margin: 0;
+    padding: 0;
+    
+}
+footer {
+    grid-area: ft;
+}
+main {
+    grid-area: main;
+    padding: 3pt;
+}
+.navbar {
+    grid-area: nb;
+    list-style-type: none;
+    margin: 0;
+    padding: 0;
+}
+.navbar li {
+    float: left;
+}
+.navbar li a {
+    display: block;
+    padding: 14px 16px;
+    font-size: 20pt;
+    text-align: center;
+    text-decoration: none;
+}
+.a1 {
+    grid-area: a1;
+    margin-left: 6pt;
+}
+.a1img {
+   grid-area: a1img; 
+}
+
+.content {
+    max-width: 600pt;
+    margin: auto;
+    display: none;
+    grid-template-columns: repeat(3, 1fr);
+    grid-template-areas: 
+      "hd hd hd"
+      "nb nb nb"
+      "a1img main main"
+      "a1 main main"
+      "ft ft ft";
+}
+
+.newspaper {
+    display: grid;
+}

@@ -1,0 +1,40 @@
+
+header {
+    grid-area: hd;
+    font-size: 30pt;
+}
+footer {
+    grid-area: ft;
+}
+.intro {
+    grid-area: main;
+    padding: 3pt;
+}
+main {
+    grid-area: main2;
+    padding: 3pt;
+}
+img {
+    grid-area: i;
+    border: solid;
+    box-sizing: border-box;
+    object-fit: cover;
+    width: 100%;
+}
+
+.content {
+    max-width: 400pt;
+    margin: auto;
+    display: none;
+    grid-template-columns: 1fr 3fr 1fr;
+    grid-template-areas: 
+      "hd hd hd"
+      "main main main"
+      ". i ."
+      "main2 main2 main2"
+      "ft ft ft";
+}
+
+.blog {
+    display: grid;
+}

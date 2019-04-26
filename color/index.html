@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>Color demo</title>
+    <link href="https://fonts.googleapis.com/css?family=Cinzel|Lobster|Montserrat|PT+Serif" rel="stylesheet"> 
+    <link rel="stylesheet" id="stylesheet">
+    <style id="color-stylesheet"></style>
+    <style>
+        #overlay {
+            position: fixed;
+            width: 120pt;
+            padding: 4pt;
+            border-bottom: solid;
+            border-right: solid;
+            border-color: black;
+            top: 0;
+            left: 0;
+            background-color: white;
+            z-index: 2;
+        }
+
+        #color-picker, input {
+            width: 6.5ch;
+        }
+
+        body {
+            margin: 0;
+        }
+    </style>
+    <script type="text/javascript" src="script.js"></script>
+</head>
+<body class="background-bg">
+    <span id="overlay">
+        <span id="color-picker">
+            Primary <br /> <input name="primary" id="primary" maxlength="6"> <br />
+            Secondary <br /> <input name="secondary" id="secondary" maxlength="6"> <br />
+            Accents <br /> <input name="accent" id="accent" maxlength="6"> <br />
+            Text <br /> <input name="text" id="text" maxlength="6"> <br />
+            Text Background <br /> <input name="text-background" id="text-background" maxlength="6"> <br />
+            Background <br /> <input name="background" id="background" maxlength="6"> <br />
+        </span>
+        <span id="style-picker"></span>
+    </span>
+    <!-- Example webpages -->
+
+    <span class="travel content text text-background-bg">
+        <ul class="sidebar secondary-bg">
+            <li>Cool Post</li>
+            <li>Exotic travel</li>
+            <li>Short trip</li>
+            <li>Airplane snacks</li>
+            <li>How to pack your bags</li>
+        </ul>
+        <header class="primary-bg accent-border text-background">My travel blog</header>
+        <footer class="primary-bg">Written by Clark Kent</footer>
+        <img src="media/air.jpg" class="secondary">
+        <main><h1>How cool is that?</h1><p class="lorem"></p></main>
+    </span>
+
+    <span class="blog content text text-background-bg">
+        <header class="primary">Bun blog</header>
+        <span class="lorem-short intro"></span>
+        <main class="lorem"></main>
+        <footer class="secondary-bg">A blog by outdoorsman Elmer J. Fudd</footer>
+        <img src="media/bun.jpg" class="secondary accent-border">
+    </span>
+
+    <span class="newspaper content text text-background-bg">
+            <ul class ="navbar secondary-bg accent-border">
+                <li><a class="text-background">Home</a></li>
+                <li><a class="text-background">News</a></li>
+                <li><a class="text-background">Contact</a></li>
+                <li><a class="text-background">About</a></li>
+                </ul> 
+            <header class="primary accent-border">The End-Times</header>
+            <main><h1>The end is neigh!</h1><p class="lorem"></p></main>
+            <footer class="secondary-bg"><br/></footer>
+            <img class="a1img" src="media/neigh.jpg" class="secondary accent-border">
+            <span class="a1 lorem-short"></span> 
+        </span>
+</body>
+</html>
