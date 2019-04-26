@@ -49,6 +49,10 @@ function onLoadComplete(event) {
             val[1] = elem.value;
         }
         elem.addEventListener("input", event => {
+            elem.value = elem.value.replace(/[^A-Fa-f0-9]+/g, '');
+            if (elem.value.length > 6) {
+                elem.value = elem.value.substring(0, 6);
+            }
             if(elem.value.length == 6) {
                 val[1] = elem.value;
                 setPalette();
