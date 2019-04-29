@@ -1,6 +1,6 @@
 document.addEventListener("DOMContentLoaded", onLoadComplete, true);
 
-let styles = ["Travel Blog", "Newspaper"];
+let styles = ["Travel Blog", "Newspaper", "Social Media"];
 
 let colorAreas = [["primary", ''],
     ["secondary", ''],
