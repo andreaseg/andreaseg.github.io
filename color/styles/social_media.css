@@ -24,6 +24,10 @@ header {
 
 main article {
     grid-area: a;
+    
+}
+
+main article, .commercial-box article, .link-box {
     padding: 1em;
     margin: 6pt;
 }
@@ -59,6 +63,15 @@ main article {
     margin: 0.3em;
 }
 
+.link-box {
+    grid-area: l;
+    list-style-type: none;
+}
+
+.commercial-box {
+    grid-area: c;
+}
+
 .content {
     width: 100%;
     margin: auto;
@@ -80,5 +93,5 @@ main {
     grid-template-columns: 2fr 7fr 3fr;
     grid-template-areas: 
       ". . ."
-      ". a ."
+      "l a c"
 }
