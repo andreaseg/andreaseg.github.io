@@ -1,0 +1,673 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="UTF-8">
+        <title>Palette cards</title>
+        <style>
+            body {
+                margin: 0
+            }
+
+            .card {
+                margin: 0.18cm;
+                min-width: 6.3cm;
+                max-width: 6.3cm;
+                min-height: 8.8cm;
+                max-height: 8.8cm;
+                overflow: hidden;
+                border-radius: 0.3cm;
+                position: relative;
+                display: flex;
+                background-color: hsl(0, 0%, 88%);
+                display: inline-block;
+            }
+
+            .background {
+                position: absolute;
+                left: 0.25cm;
+                top: 0.25cm;
+                min-width: 5.8cm;
+                max-width: 5.8cm;
+                min-height: 8.3cm;
+                max-height: 8.3cm;
+                border-radius: 0.22cm;
+                background-color: #ffffff;
+                box-shadow: inset 0 0 3px rgb(0, 0, 0);
+            }
+
+            .label {
+                position: absolute;
+                right: 0.5cm;
+                bottom: 0.5cm;
+                max-width: 5.3cm;
+                background-color: rgba(0, 255, 13, 0);
+                font-family: Garamond, serif;
+            }
+
+            .code {
+                position: absolute;
+                left: 0.5cm;
+                bottom: 0.5cm;
+                max-width: 5.3cm;
+                font-size: 8pt;
+                background-color: rgba(0, 204, 255, 0);
+                overflow: hidden;
+                white-space: nowrap;
+                text-overflow: ellipsis;
+                font-family: Garamond, serif;
+            }
+
+            .name {
+                position: absolute;
+                left: 0.5cm;
+                top: 0.5cm;
+                max-width: 5.3cm;
+                font-weight: bold;
+                background-color: rgba(255, 0, 0, 0);
+                overflow: hidden;
+                white-space: nowrap;
+                text-overflow: ellipsis;
+                font-family: Garamond, serif;
+            }
+
+            .swatch {
+                position: absolute;
+                left: 0.5cm;
+                top: 1cm;
+                min-width: 5.3cm;
+                max-width: 5.3cm;
+                min-height: 3.3cm;
+                max-height: 3.3cm;
+                box-shadow: inset 0 0 3px rgba(0, 0, 0, 0.342);
+                z-index: 1;
+            }
+
+            .lightfastness {
+                position: absolute;
+                left: 1cm;
+                bottom: 1.1cm;
+                min-width: 1.43cm;
+                max-width: 1.43cm;
+                min-height: 0.7cm;
+                max-height: 0.7cm;
+                background-color: rgba(255, 0, 0, 0);
+            }
+
+            .lightfastness > .key_info_symbol {
+                margin-top: 0.1cm;
+                font-size: 9pt;
+            }
+
+            .opacity {
+                position: absolute;
+                left: 2.43cm;
+                bottom: 1.1cm;
+                min-width: 1.43cm;
+                max-width: 1.43cm;
+                min-height: 0.7cm;
+                max-height: 0.7cm;
+                background-color: rgba(0, 255, 55, 0);
+            }
+
+            .staining {
+                position: absolute;
+                right: 1cm;
+                bottom: 1.1cm;
+                min-width: 1.43cm;
+                max-width: 1.43cm;
+                min-height: 0.7cm;
+                max-height: 0.7cm;
+                background-color: rgba(17, 0, 255, 0);
+            }
+
+            .key_info_symbol {
+                position: absolute;
+                text-align: center;
+                min-width: 1.43cm;
+                max-width: 1.43cm;
+                left: 0cm;
+                top: 0cm;
+                font-size: 10pt;
+            }
+
+            .key_info_label {
+                position: absolute;
+                text-align: center;
+                min-width: 1.43cm;
+                max-width: 1.43cm;
+                left: 0cm;
+                bottom: 0cm;
+                font-size: 6pt;
+                overflow: hidden;
+                background-color: rgba(137, 43, 226, 0);
+            }
+
+            .info {
+                position: absolute;
+                left: 0.5cm;
+                top: 5cm;
+                min-width: 5.3cm;
+                max-width: 5.3cm;
+                min-height: 2cm;
+                max-height: 2cm;
+                background-color: rgba(247, 0, 255, 0);
+                
+            }
+
+            .info > * {
+                padding-top: 0.2cm;
+                padding-left: 1.2cm;
+            }
+
+            .pigments {
+                position: absolute;
+                left: 0.5cm;
+                top: 4.3cm;
+                min-width: 5.3cm;
+                max-width: 5.3cm;
+                min-height: 0.7cm;
+                max-height: 0.7cm;
+                background-color: rgba(0, 255, 21, 0);
+                line-height: 100%;
+                font-size: 6pt;
+                overflow: hidden;
+            }
+
+            .card-delete-button {
+                position: absolute;
+                top: 0.1cm;
+                right: 0.1cm;
+                z-index: 9999;
+            }
+
+            @media print {
+                .no-print {
+                    display: none;
+                }
+            }
+
+            #error-background {
+                width: 100%;
+                height: 100%;
+                background-color: rgba(0, 0, 0, 0.438);
+                position: fixed;
+                left: 0;
+                top: 0;
+                display: none;
+            }
+
+            #error-modal {
+                border: 1px solid black;
+                width: 320px;
+                height: 160px;
+                position: relative;
+                left: max(calc(50% - 160px), 0px);
+                top: max(calc(30% - 80px), 0px);
+                background-color: rgb(255, 255, 255);
+            }
+
+            #errors {
+                min-width: 300px;
+                max-width: 300px;
+                min-height: 100px;
+                max-height: 100px;
+                position: absolute;
+                left: 10px;
+                top: 10px;
+                overflow: scroll;
+            }
+
+            #errors-close {
+                position: absolute;
+                left: 140px;
+                bottom: 20px;
+            }
+
+
+        </style>
+        <script>
+
+            const LIGHTFASTNESS_100_PLUS = 4;
+            const LIGHTFASTNESS_50_TO_100 = 3;
+            const LIGHTFASTNESS_15_TO_50 = 2;
+            const LIGHTFASTNESS_2_TO_15 = 1;
+            const LIGHTFASTNESS_2_MINUS = 0;
+
+            const OPAQUE = 2;
+            const SEMI_OPAQUE = 1;
+            const TRANSPARENT = 0;
+
+            const STAINING = 2;
+            const SEMI_STAINING = 1;
+            const NOT_STAINING = 0;
+
+            const SUPER_GRANULATING = 2;
+            const GRANULATING = 1;
+            const NOT_GRANULATING = 0;
+
+            const TOXIC = 1;
+            const NON_TOXIC = 0;
+
+
+            const pigmentDict = {
+                "PB15": "phthalo blue",
+                "PB15:3": "phthalo blue",
+                "PB15:4": "phthalo blue",
+                "PB15:6": "phthalo blue",
+                "PB16":	"phthalo turquoise",
+                "PB22": "indanthrone blue",
+                "PB27": "prussian blue",
+                "PB28":"cobalt blue",
+                "PB29": "ultramarine deep",
+                "PB35": "cerulean blue",
+                "PB36": "cobalt turquoise",
+                "PB60": "indanthrene blue",
+                "PB66": "indigo",
+                "PB74": "cobalt blue deep",
+
+                "PBK1": "peach black",
+                "PBK6": "lamp black",
+                "PBK7": "lamp black",
+                "PBK8": "vine black",
+                "PBK9": "ivory black",
+                "PBK10": "graphite gray",
+                "PBK11": "mars black",
+                "PBK31": "perylene green",
+
+                "PBR6": "van dyke brown",
+                "PBR7": "sienna/umber",
+                "PBR24": "naples yellow deep",
+
+                "PG7": "phthalo green",
+                "PG8": "hooker's green",
+                "PG17": "chromium oxide green",
+                "PG18": "viridian",
+                "PG19": "cobalt green",
+                "PG23": "terre verte",
+                "PG26": "cobalt green dark",
+                "PG36": "phthalo green",
+                "PG50": "cobalt green",
+
+                "P05": "permanent red light",
+                "PO20": "cadmium orange",
+                "PO34": "cinnebar red",
+                "PO36": "benzimida orange deep",
+                "PO43": "perinone orange",
+                "PO62": "permanent orange",
+                "PO67":	"coral orange",
+                "PO69": "scheveningen orange",
+                "PO71": "translucent orange",
+                "PO73":	"scarlet pyrrol",
+
+                "PR9": "permanent red deep",
+                "PR23": "crimson lake",
+                "PR83": "alizarin crimson",
+                "PR106": "vermilion ",
+                "PR108": "cadmium red",
+                "PR112": "permanent red",
+                "PR149": "perylene scarlet",
+                "PR168": "permanent red light",
+                "PR170": "permanent red",
+                "PR176": "carmine (hue)",
+                "PR177": "anthraquinoid red",
+                "PR178": "perylene red",
+                "PR179": "perylene maroon",
+                "PR188": "organic vermilion",
+                "PR209": "quinacridone red",
+                "PR251": "permanent red",
+                "PR254": "pyrrol red",
+                "PR255": "pyrrol scarlet",
+                "PR264": "pyrrol crimson",
+
+                "PV14": "cobalt violet",
+                "PV15": "ultramarine violet",
+                "PV16": "manganese violet",
+                "PV23": "dioxazine purple",
+
+                "PY3": "lemon yellow",
+                "PY35": "cadmium yellow",
+                "PY37": "cadmium yellow light",
+                "PY40": "aureolin",
+                "PY53": "nickel titanate yellow",
+                "PY65": "hansa yellow deep",
+                "PY74": "hansa yellow medium",
+                "PY83": "scheveningen yellow deep",
+                "PY97": "hansa yellow medium",
+                "PY108": "gamboge modern",
+                "PY110": "permanent yellow deep",
+                "PY129": "green gold",
+                "PY138": "permanent yellow",
+                "PY150": "nickel azo yellow",
+                "PY151": "azo yellow",
+                "PY153": "new gamboge",
+                "PY154": "azo yellow light",
+                "PY175": "permanent yellow lemon",
+                "PY184": "bismuth yellow",
+
+                "PW4":"chinese white",
+                "PW6": "titanium white"
+
+            };
+
+            const card = (props) => {
+                const { label, name, code, lightfastness, opacity, staining, granulating, toxic, pigments } = props;
+            
+                const id = `card-${Math.floor(Math.random() * Number.MAX_SAFE_INTEGER)}`;
+
+                console.log(`Adding card ${id}`, props)
+
+                const cardElement = document.createElement("div");
+                cardElement.className = "card";
+                cardElement.id = id;
+
+                const swatchElement = document.createElement("div");
+                swatchElement.className = "swatch";
+                cardElement.appendChild(swatchElement);
+
+                const backgroundElement = document.createElement("div");
+                backgroundElement.className = "background";
+                cardElement.appendChild(backgroundElement);
+                
+                const labelElement = document.createElement("div");
+                labelElement.className = "label";
+                labelElement.textContent = label;
+                cardElement.appendChild(labelElement);
+
+                const nameElement = document.createElement("div");
+                nameElement.className = "name";
+                nameElement.textContent = name;
+                cardElement.appendChild(nameElement);
+
+                const codeElement = document.createElement("div");
+                codeElement.className = "code";
+                codeElement.textContent = code;
+                cardElement.appendChild(codeElement);
+
+                const lightfastnessElement = document.createElement("div");
+                lightfastnessElement.className = "lightfastness";
+                cardElement.appendChild(lightfastnessElement);
+                {
+                    const symbol = document.createElement("div");
+                    symbol.className = "key_info_symbol";
+                    symbol.innerText = ["V", "IV", "III", "II", "I"][lightfastness];
+                    lightfastnessElement.appendChild(symbol);
+
+                    const label = document.createElement("div");
+                    label.className = "key_info_label";
+                    label.innerText = ["very poor", "poor", "fair", "very good", "excellent "][lightfastness];
+                    lightfastnessElement.appendChild(label);
+                }
+
+                const opacityElement = document.createElement("div");
+                opacityElement.className = "opacity";
+                cardElement.appendChild(opacityElement);
+                {
+                    const symbol = document.createElement("div");
+                    symbol.className = "key_info_symbol";
+                    symbol.innerText = ["□", "◪", "■"][opacity];
+                    opacityElement.appendChild(symbol);
+
+                    const label = document.createElement("div");
+                    label.className = "key_info_label";
+                    label.innerText = ["transparent", "semi-opaque", "opaque"][opacity];
+                    opacityElement.appendChild(label);
+                }
+
+
+                const stainingElement = document.createElement("div");
+                stainingElement.className = "staining";
+                cardElement.appendChild(stainingElement);
+                {
+                    const symbol = document.createElement("div");
+                    symbol.className = "key_info_symbol";
+                    symbol.innerText = ["△", "◮", "▲"][staining];
+                    stainingElement.appendChild(symbol);
+
+                    const label = document.createElement("div");
+                    label.className = "key_info_label";
+                    label.innerText = ["non-staining", "semi-staining", "staining"][staining];
+                    stainingElement.appendChild(label);
+                }
+
+                const infoElement = document.createElement("div");
+                infoElement.className = "info";
+                cardElement.appendChild(infoElement);
+
+                if (typeof granulating != "undefined" && (granulating == 1 || granulating == 2) ) {
+                    const granulatingElement = document.createElement("div");
+                    granulatingElement.className = "granulating";
+                    if (granulating == 1) {
+                        granulatingElement.innerText = "Granulating";
+                    } else if (granulating == 2) {
+                        granulatingElement.innerText = "Super Granulating";
+                    } else {
+                        throw new Error(`Invalid granulation code ${granulating}`);
+                    }
+                    infoElement.appendChild(granulatingElement);
+                }
+                
+                if (typeof toxic != "undefined" && toxic == 1) {
+                    const toxicElement = document.createElement("div");
+                    toxicElement.className = "toxic";
+                    toxicElement.innerText = "Toxic";
+                    infoElement.appendChild(toxicElement);
+                }
+
+                const pigmentsElement = document.createElement("div");
+                const foo = [];
+                pigmentsElement.className = "pigments";
+                if (typeof pigments != "undefined") {
+                    pigmentsElement.innerHTML = pigments
+                    .map(pigment => {
+                        const dictEntry = pigmentDict[pigment];
+                        if (typeof dictEntry != "undefined") {
+                            return `${pigment} <i>${dictEntry}</i>`
+                        } else {
+                            return pigment
+                        }
+                    })
+                    .join(", ")
+                    
+                }
+                cardElement.appendChild(pigmentsElement);
+
+                const deleteButton = document.createElement("button");
+                deleteButton.innerText = "X";
+                deleteButton.addEventListener("click", () => {removeCard(id)});
+                deleteButton.className = "no-print card-delete-button";
+                cardElement.appendChild(deleteButton);
+
+                return cardElement;
+            }
+
+            const addCard = (props) => {
+                document.getElementById("cards").appendChild(card(props));
+            };
+
+            const removeCard = (id) => {
+                console.log(`Removing card ${id}`)
+                document.getElementById(id).remove();
+            };
+
+            const validate = (props) => {
+                try {
+                    if (props["name"].trim() == "") {
+                        throw Error("Name field is mandatory");
+                    }
+                    
+                } catch (err) {
+                    
+                    document.getElementById("errors").innerText = err.message;
+                    showErrorModal(true);
+                    throw err;
+                }
+                
+            }
+
+            const showErrorModal = (show) => {
+                document.getElementById("error-background").style.display = show ? "block" : "none";
+            }
+
+            const onFormSubmit = (event) => {
+                event.preventDefault();
+
+                console.log(document.getElementById("card-form"));
+
+                const props = {
+                    "label": document.getElementById('label').value,
+                    "name":  document.getElementById('name').value,
+                    "code": document.getElementById('number').value,
+                    "lightfastness":  Array.from(document.querySelectorAll('input[name="lightfastness"]')
+                        .values()).filter((radio) => radio.checked)[0].value,
+                    "opacity":  Array.from(document.querySelectorAll('input[name="opacity"]')
+                        .values()).filter((radio) => radio.checked)[0].value,
+                    "staining":  Array.from(document.querySelectorAll('input[name="staining"]')
+                        .values()).filter((radio) => radio.checked)[0].value,
+                    "granulating":  document.getElementById('granulating').checked ? 1 : 0,
+                    "toxic":  document.getElementById('toxic').checked ? 1 : 0,
+                    "pigments":  document.getElementById('pigments').value
+                        .toUpperCase()
+                        .split('\n')
+                        .map((str) => str.trim())
+                        .filter((str) => str != ""),
+                };
+
+                validate(props);
+                addCard(props);
+
+            };
+
+            
+            const init = () => {
+                document.getElementById("form-button").addEventListener("click", onFormSubmit);
+                document.getElementById("errors-close").addEventListener("click", () => {showErrorModal(false)})
+            }
+
+            document.addEventListener('DOMContentLoaded', init, false);
+
+            
+        </script>
+    </head>
+    <body>
+        <div id="error-background">
+            <div id="error-modal">
+                <div id="errors"></div>
+                <button id="errors-close">Ok</button>
+            </div>
+        </div>
+        
+        <div class="no-print">
+            <form id="card-form" style="max-width: 700px; border: 1px solid black; margin: 20px; padding: 5px;">
+                <fieldset>
+                    <legend>Lightfastness</legend>
+                    <label for="name">Name</label>
+                    <input type="text" id="name" name="name">
+
+                    <label for="label">Label</label>
+                    <select id="label" name="label">
+                    <option value="Daniel Smith">Daniel Smith</option>
+                    <option value="Holbein">Holbein</option>
+                    <option value="Rembrandt">Rembrandt</option>
+                    <option value="Akademie">Schmincke Akademie</option>
+                    <option value="Horadam">Schmincke Horadam</option>
+                    <option value="Sennelier">Sennelier</option>
+                    <option value="Van Gogh">Van Gogh</option>
+                    <option value="Winsor & Newton">Winsor & Newton</option>
+                    <option value="W&N Cotman">Winsor & Newton Cotman</option>
+                    </select>
+
+                    <label for="number">Number</label>
+                    <input type="text" id="number" name="number">
+                </fieldset>
+
+                <fieldset>
+                    <legend>Lightfastness</legend>
+                
+                    <div>
+                      <input type="radio" id="very-poor-lightfastness" name="lightfastness" value="0">
+                      <label for="very-poor-lightfastness">V: Very poor lightfastness (&lt 2 years)</label>
+                    </div>
+                
+                    <div>
+                      <input type="radio" id="poor-lightfastness" name="lightfastness" value="1">
+                      <label for="poor-lightfastness">IV: Poor lightfastness (2-15 years)</label>
+                    </div>
+                
+                    <div>
+                      <input type="radio" id="fair-lightfastness" name="lightfastness" value="2">
+                      <label for="fair-lightfastness">III: Fair lightfastness (15-50 years)</label>
+                    </div>
+
+                    <div>
+                        <input type="radio" id="very good lightfastness" name="lightfastness" value="3" checked>
+                        <label for="very good lightfastness">II: Very good lightfastness (50-100 years)</label>
+                      </div>
+
+                      <div>
+                        <input type="radio" id="excellent-lightfastness" name="lightfastness" value="4">
+                        <label for="excellent-lightfastness">I: Excellent lightfastness (100+ years)</label>
+                      </div>
+                </fieldset>
+
+                <fieldset>
+                    <legend>Opacity</legend>
+                
+                    <div>
+                      <input type="radio" id="transparent" name="opacity" value="0" checked>
+                      <label for="transparent">Transparent</label>
+                    </div>
+                
+                    <div>
+                      <input type="radio" id="semi-opaque" name="opacity" value="1">
+                      <label for="semi-opaque">Semi-Opaque</label>
+                    </div>
+                
+                    <div>
+                      <input type="radio" id="opaque" name="opacity" value="2">
+                      <label for="opaque">Opaque</label>
+                    </div>
+                </fieldset>
+
+                <fieldset>
+                    <legend>Staining</legend>
+                
+                    <div>
+                      <input type="radio" id="huey" name="staining" value="0" checked>
+                      <label for="huey">Non-Staining</label>
+                    </div>
+                
+                    <div>
+                      <input type="radio" id="dewey" name="staining" value="1">
+                      <label for="dewey">Semi-Staining</label>
+                    </div>
+                
+                    <div>
+                      <input type="radio" id="louie" name="staining" value="2">
+                      <label for="louie">Staining</label>
+                    </div>
+                </fieldset>
+
+                <fieldset>
+                    <legend>Special properties</legend>
+
+                    <input type="checkbox" id="toxic" name="toxic">
+                    <label for="toxic">Toxic</label>
+
+                    <input type="checkbox" id="granulating" name="granulating">
+                    <label for="granulating">Granulating</label>
+
+                </fieldset>
+
+                <fieldset>
+                    <legend>Pigments</legend>
+                    <textarea name="pigments" id="pigments" rows="10" cols="30"></textarea> 
+                </fieldset>
+                
+
+                <button id="form-button" style="padding: 5px; margin: 5px; font-size: 14pt;" onclick="">Add Card</button>
+            </form>
+        </div>
+        
+        <div id="cards"></div>
+    </body>
+</html>
