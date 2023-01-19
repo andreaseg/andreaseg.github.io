@@ -480,7 +480,7 @@
 
                     const label = document.createElement("div");
                     label.className = "key_info_label";
-                    label.innerText = ["non-staining", "semi-staining", "staining"][staining];
+                    label.innerText = ["non-staining", "low-staining", "staining"][staining];
                     stainingElement.appendChild(label);
                 }
 
@@ -690,18 +690,18 @@
                     <legend>Staining</legend>
                 
                     <div>
-                      <input type="radio" id="huey" name="staining" value="0" checked>
-                      <label for="huey">Non-Staining</label>
+                      <input type="radio" id="non-staining" name="staining" value="0" checked>
+                      <label for="non-staining">Non-Staining</label>
                     </div>
                 
                     <div>
-                      <input type="radio" id="dewey" name="staining" value="1">
-                      <label for="dewey">Semi-Staining</label>
+                      <input type="radio" id="low-staining" name="staining" value="1">
+                      <label for="low-staining">Low-Staining</label>
                     </div>
                 
                     <div>
-                      <input type="radio" id="louie" name="staining" value="2">
-                      <label for="louie">Staining</label>
+                      <input type="radio" id="staining" name="staining" value="2">
+                      <label for="staining">Staining</label>
                     </div>
                 </fieldset>
 
