@@ -379,7 +379,7 @@
                 const mixed = [...pigments].reverse()
                     .map(pigment => {
                         for (const [prefix, color] of Object.entries(pigmentGroups)) {
-                            if (pigment.startsWith(prefix)) {
+                            if (pigment.toUpperCase().startsWith(prefix)) {
                                 return prefix;
                             }
                         }
@@ -514,16 +514,21 @@
                 if (typeof pigments != "undefined") {
                     pigmentsElement.innerHTML = pigments
                     .map(pigment => {
-                        const dictEntry = pigmentDict[pigment];
+                        const dictEntry = pigmentDict[pigment.toUpperCase()];
                         if (typeof dictEntry != "undefined") {
-                            return `${pigment} <i>${dictEntry}</i>`
+                            return `${pigment.toUpperCase()} <i>${dictEntry}</i>`
                         } else {
                             const pigmentParts = pigment.split(" ");
-                            let pitmentStr = pigmentParts[0];
-                            for (let i = 1; i < pigmentParts.length; i++) {
-                                pitmentStr += ` <i>${pigmentParts[i].toLowerCase()}</i>`;
+                            let pigmentStr = pigmentParts[0];
+                            if (/^[pP][a-zA-Z]+\d+$/.test(pigmentStr)) {
+                                pigmentStr = pigmentStr.toUpperCase();
+                            } else {
+                                pigmentStr = `<i>${pigmentStr.toLowerCase()}</i>`;
                             }
-                            return pitmentStr
+                            for (let i = 1; i < pigmentParts.length; i++) {
+                                pigmentStr += ` <i>${pigmentParts[i].toLowerCase()}</i>`;
+                            }
+                            return pigmentStr;
                         }
                     })
                     .join(", ")
@@ -584,7 +589,6 @@
                     "granulating":  document.getElementById('granulating').checked ? 1 : 0,
                     "toxic":  document.getElementById('toxic').checked ? 1 : 0,
                     "pigments":  document.getElementById('pigments').value
-                        .toUpperCase()
                         .split('\n')
                         .map((str) => str.trim())
                         .filter((str) => str != ""),
