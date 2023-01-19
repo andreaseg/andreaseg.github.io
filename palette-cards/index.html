@@ -70,7 +70,7 @@
                 font-family: Garamond, serif;
             }
 
-            .swatch {
+            .swatch, .swatch-background {
                 position: absolute;
                 left: 0.5cm;
                 top: 1cm;
@@ -80,6 +80,11 @@
                 max-height: 3.3cm;
                 box-shadow: inset 0 0 3px rgba(0, 0, 0, 0.342);
                 z-index: 1;
+            }
+
+            .swatch-background {
+                left: 0;
+                top: 0;
             }
 
             .lightfastness {
@@ -288,7 +293,7 @@
                 "PG36": "phthalo green",
                 "PG50": "cobalt green",
 
-                "P05": "permanent red light",
+                "PO5": "permanent red light",
                 "PO20": "cadmium orange",
                 "PO34": "cinnebar red",
                 "PO36": "benzimida orange deep",
@@ -302,7 +307,8 @@
                 "PR9": "permanent red deep",
                 "PR23": "crimson lake",
                 "PR83": "alizarin crimson",
-                "PR106": "vermilion ",
+                "PR106": "vermilion",
+                "PR101": "venetian red",
                 "PR108": "cadmium red",
                 "PR112": "permanent red",
                 "PR149": "perylene scarlet",
@@ -349,6 +355,50 @@
 
             };
 
+            const swatchColor = (pigments) => {
+                const defaultSwatchColor = [0.9, 0.9, 0.9];
+
+                const formatRgb = ([r, g, b]) => 
+                `rgb(${Math.round(255 * r)}, ${Math.round(255 * g)}, ${Math.round(255 * b)})`;
+
+                if (typeof pigments == "undefined") {
+                    return formatRgb(defaultSwatchColor);
+                }
+
+                const pigmentGroups = {
+                    "PBK": [0, 0, 0], 
+                    "PBR": [0.5, 0.25, 0], 
+                    "PB":  [0, 0, 1],
+                    "PG": [0, 1, 0], 
+                    "PO": [1, 0.5, 0], 
+                    "PR": [1, 0, 0], 
+                    "PV": [0.5, 0, 1],
+                    "PY": [1, 1, 0], 
+                    "PW": [1, 1, 1]
+                };
+                const mixed = [...pigments].reverse()
+                    .map(pigment => {
+                        for (const [prefix, color] of Object.entries(pigmentGroups)) {
+                            if (pigment.startsWith(prefix)) {
+                                return prefix;
+                            }
+                        }
+                        return null;
+                    })
+                    .filter(pigment => pigment != null)
+                    .reduce((acc, pigment) => {
+                        const [pr, pg, pb] = pigmentGroups[pigment];
+                        if (acc == null) {
+                            return [pr, pg, pb];
+                        }
+                        const [ar, ag, ab] = acc;
+                        return [0.5 * (ar + pr), 0.5 * (ag + pg), 0.5 * (ab + pb)];
+                    }, null);
+
+                return formatRgb(mixed == null ? defaultSwatchColor : mixed); 
+                
+            }
+
             const card = (props) => {
                 const { label, name, code, lightfastness, opacity, staining, granulating, toxic, pigments } = props;
             
@@ -363,6 +413,11 @@
                 const swatchElement = document.createElement("div");
                 swatchElement.className = "swatch";
                 cardElement.appendChild(swatchElement);
+
+                const swatchBackgroundElement = document.createElement("div");
+                swatchBackgroundElement.className = "swatch-background no-print";
+                swatchBackgroundElement.style.backgroundColor = swatchColor(pigments);
+                swatchElement.appendChild(swatchBackgroundElement);
 
                 const backgroundElement = document.createElement("div");
                 backgroundElement.className = "background";
@@ -463,7 +518,12 @@
                         if (typeof dictEntry != "undefined") {
                             return `${pigment} <i>${dictEntry}</i>`
                         } else {
-                            return pigment
+                            const pigmentParts = pigment.split(" ");
+                            let pitmentStr = pigmentParts[0];
+                            for (let i = 1; i < pigmentParts.length; i++) {
+                                pitmentStr += ` <i>${pigmentParts[i].toLowerCase()}</i>`;
+                            }
+                            return pitmentStr
                         }
                     })
                     .join(", ")
@@ -510,8 +570,6 @@
 
             const onFormSubmit = (event) => {
                 event.preventDefault();
-
-                console.log(document.getElementById("card-form"));
 
                 const props = {
                     "label": document.getElementById('label').value,
