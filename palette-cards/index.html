@@ -663,7 +663,7 @@
                 const url = new URL(window.location);
                 const queryParamValue = encodeState(cardState);
                 url.searchParams.set('p', queryParamValue);
-                window.history.pushState(null, '', url.toString());
+                history.replaceState(null, document.title, url.toString());
             }
 
             const getStateFromPath = () => {
