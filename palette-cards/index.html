@@ -688,6 +688,7 @@
                 console.log(`Removing card ${id}`)
                 delete cardState[id];
                 document.getElementById(id).remove();
+                writeStateToPath();
             };
 
             
