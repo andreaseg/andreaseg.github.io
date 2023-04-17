@@ -9,6 +9,11 @@
                 display: flex;
             }
 
+            #menu {
+                height: fit-content;
+                padding: 8px;
+            }
+
             .color-container > label {
                 display: flex;
             }
@@ -16,6 +21,29 @@
             .color-preview {
                 width: 1em;
                 height: 1em;
+            }
+
+            button {
+                width: 10em;
+            }
+
+            #palette-presets > button {
+                display: block;
+                margin: auto;
+            }
+
+            #save-button {
+                display: block;
+                margin: auto;
+                margin-top: 10px;
+            }
+
+            fieldset, #menu {
+                border: 1px solid lightgray;
+            }
+
+            legend {
+                color: gray;
             }
 
         </style>
@@ -29,10 +57,6 @@
                     this.hue = hue;
                     this.saturation = saturation;
                     this.lightness = lightness;
-                }
-
-                toString() {
-                    return `${this.name}`;
                 }
             }
 
@@ -234,7 +258,7 @@
 
             const drawGamut = (ctx, colors) => {
                 ctx.fillStyle = 'black';
-                ctx.font = '20px Verdana';
+                ctx.font = '16px Verdana';
                 ctx.beginPath();
                 const path = new Path2D();
 
@@ -301,6 +325,17 @@
                     });
                 redrawCanvas();
             }
+
+            const pickNRandomColors = (n) => {
+                const picked = [];
+                let availableColors = [...colors].map((value, idx) => idx);
+                for (let i = 0; i < n; i++) {
+                    const randomInt = Math.floor(Math.random() * availableColors.length);
+                    picked.push(availableColors[randomInt]);
+                    availableColors = availableColors.filter((c, idx) => idx != randomInt);
+                }
+                return picked;
+            }
             
 
             const randomTriad = () => {
@@ -308,19 +343,13 @@
                 const black = new Color('Black', 0, 0, 0);
 
                 const containsBlack = (triad) => {
-                    const blackCount = triad.filter(c => c.saturation < 10).length;
+                    const blackCount = triad.filter(c => colors[c].saturation < 10).length;
                     return blackCount == 1 || isInColors(black, triad.map(idx => colors[idx]));
                 }
 
                 let triad = [];
                 while(!containsBlack(triad)) {
-                    triad = [];
-                    let availableColors = [...colors].map((value, idx) => idx);
-                    for (let i = 0; i < 3; i++) {
-                        const randomInt = Math.floor(Math.random() * availableColors.length);
-                        triad.push(availableColors[randomInt]);
-                        availableColors = availableColors.filter((c, idx) => idx != randomInt);
-                    }
+                    triad = pickNRandomColors(3);
                 }
                 
 
@@ -328,11 +357,53 @@
                     
             };
 
+            const vectorDistance = (v1, v2) => {
+                return Math.sqrt(Math.pow(v2[0] - v1[0], 2) + Math.pow(v2[1] - v1[1], 2));
+            }
+
+            const vectorSub = (v1, v2) => {
+                return [v2[0] - v1[0], v2[1] - v1[1]];
+            }
+
+            const complementary = () => {
+                const isComp = (comp) => {
+                    if (comp.length == 0) {
+                        return false;
+                    }
+                    const blackCount = comp.filter(c => colors[c].saturation < 20).length;
+                    if (blackCount >= 1) {
+                        return false;
+                    }
+
+                    const a = hslToCanvasCoord(colors[comp[0]]);
+                    const b = hslToCanvasCoord(colors[comp[1]]);
+                    const l = vectorDistance(a, b);
+                    const d = Math.abs((b[0] - a[0])*(a[1] - 0) - (a[0] - 0)*(b[1] - a[1])) / l;
+
+                    return d < 60 && vectorDistance(a, [0, 0]) < l && vectorDistance(b, [0, 0]) < l;
+                }
+
+                let comp = [];
+                while(!isComp(comp)) {
+                    comp = pickNRandomColors(2);
+                }
+                
+
+                enableColors(comp);
+            };
+
+            const fullPalette = () => {
+                let allColors = [...colors].map((value, idx) => idx);
+                enableColors(allColors);
+            };
+
             const init = () => {
                 colors.forEach(addColor)
 
                 document.getElementById("random-button").onclick = randomTriad;
+                document.getElementById("all-button").onclick = fullPalette;
                 document.getElementById("save-button").onclick = writeStateToPath;
+                document.getElementById("random-comp").onclick = complementary;
                 
                 enableColors(getStateFromPath());
             };
@@ -343,8 +414,21 @@
     <body>
         <div class="content">
             <div id="menu">
-                <div id="color-selector"></div>
-                <button id="random-button">Random triad</button>
+                <fieldset>
+                    <legend>Paints</legend>
+                    <div id="color-selector"></div>
+                </fieldset>
+                
+                <fieldset>
+                    <legend>Preset</legend>
+                    <div id="palette-presets">
+                        <button id="random-comp">Complementary</button>
+                        <button id="random-button">Triad</button>
+                        <button id="all-button">Full palette</button>
+                    </div>
+                </fieldset>
+                
+                
                 <button id="save-button">Save palette</button>
             </div>
             
