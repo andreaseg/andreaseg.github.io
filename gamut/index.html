@@ -32,7 +32,7 @@
                 margin: auto;
             }
 
-            #save-button {
+            #save-button, #clear-button {
                 display: block;
                 margin: auto;
                 margin-top: 10px;
@@ -61,22 +61,31 @@
             }
 
             const colors = [
+                //new Color("Q. Rose Magenta", 341, 81, 75),
                 new Color("Alizarin Crimson", 349, 53, 50),
                 new Color("Cadmium Red", 357, 97, 50),
                 new Color("Cadmium Orange", 32, 95, 50),
                 new Color("Cadmium Yellow", 40, 95, 50),
+                //new Color("Indian Yellow", 47, 90, 60),
                 new Color("Winsor Lemon", 54, 90, 70),
                 new Color("Sap Green", 86, 42, 55),
                 new Color("Green Gold", 59, 61, 65),
                 new Color("Winsor Green", 172, 76, 44),
+                //new Color("Phthalo Green", 175, 84, 69),
+                //new Color("Prussian Blue", 203, 72, 68),
                 new Color("Winsor Blue", 203, 82, 50),
+                //new Color("Indigo", 214, 28, 58),
                 new Color("Ultramarine", 221, 77, 42),
+                //new Color("Smalt", 246, 25, 68),
                 new Color("Winsor Violet", 257, 53, 36),
                 new Color("Yellow Ochre", 34, 59, 70),
                 new Color("Venetian Red", 10, 43, 70),
                 new Color("Vandyke Brown", 21, 34, 41),
+                //new Color("Burnt Sienna", 25, 61, 79),
+                //new Color("Raw Sienna", 33, 38, 85),
                 new Color("Raw Umber", 34, 50, 60),
-                new Color("Ivory Black", 30, 4, 25)
+                new Color("Ivory Black", 30, 4, 25),
+                //new Color("Neutral Tint", 221, 9, 53),
             ];
 
             let displayedColors = [];
@@ -277,7 +286,6 @@
                 internalColors.forEach(color => {
                     const coords = hslToCanvasCoord(color);
                     ctx.beginPath();
-                    ctx.fillStyle = hslString(0, 0, 0);
                     ctx.arc(coords[0], coords[1], 3, 0, 2 * Math.PI, false); 
                     ctx.fill();
                     ctx.fillText(color.name, coords[0], coords[1]);
@@ -293,7 +301,6 @@
                         path.lineTo(coords[0], coords[1]);
                     }
                     ctx.beginPath();
-                    ctx.fillStyle = hslString(0, 0, 0);
                     ctx.arc(coords[0], coords[1], 3, 0, 2 * Math.PI, false); 
                     ctx.fill();
                     ctx.fillText(color.name, coords[0], coords[1]);
@@ -392,18 +399,55 @@
                 enableColors(comp);
             };
 
+            const paletteFromLimited = (paletteList) => {
+                enableColors(
+                    [...colors]
+                    .map((value, idx) => [value, idx])
+                    .filter(([value, idx], _) => paletteList.includes(value.name))
+                    .map(([value, idx], _) => idx)
+                );
+            }
+
+            const fowkesLimited = () => {
+                const palette = [
+                    "Sap Green",
+                    "Ultramarine",
+                    "Yellow Ochre",
+                    "Venetian Red",
+                    "Vandyke Brown"
+                ];
+                paletteFromLimited(palette);
+            };
+
+            const zornLimited = () => {
+                const palette = [
+                    "Cadmium Red",
+                    "Yellow Ochre",
+                    "Ivory Black"
+                ];
+                paletteFromLimited(palette);
+            };
+
             const fullPalette = () => {
                 let allColors = [...colors].map((value, idx) => idx);
                 enableColors(allColors);
             };
+
+            const clearPalette = () => {
+                enableColors([]);
+            }
 
             const init = () => {
                 colors.forEach(addColor)
 
                 document.getElementById("random-button").onclick = randomTriad;
                 document.getElementById("all-button").onclick = fullPalette;
-                document.getElementById("save-button").onclick = writeStateToPath;
+                document.getElementById("fowkes").onclick = fowkesLimited;
                 document.getElementById("random-comp").onclick = complementary;
+                document.getElementById("zorn").onclick = zornLimited;
+
+                document.getElementById("save-button").onclick = writeStateToPath;
+                document.getElementById("clear-button").onclick = clearPalette;
                 
                 enableColors(getStateFromPath());
             };
@@ -424,12 +468,15 @@
                     <div id="palette-presets">
                         <button id="random-comp">Complementary</button>
                         <button id="random-button">Triad</button>
+                        <button id="fowkes">Fowkes limited</button>
+                        <button id="zorn">Zorn limited</button>
                         <button id="all-button">Full palette</button>
                     </div>
                 </fieldset>
                 
                 
                 <button id="save-button">Save palette</button>
+                <button id="clear-button">Clear</button>
             </div>
             
             <canvas id="color-wheel" width="1000" height="1000"></canvas>
