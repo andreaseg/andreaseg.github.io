@@ -1,0 +1,343 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="UTF-8">
+        <title>Gamut</title>
+        <style>
+
+            .content {
+                display: flex;
+            }
+
+            .color-container {
+                display: flex;
+            }
+
+            .color-preview {
+                width: 1em;
+                height: 1em;
+            }
+
+        </style>
+        <script>
+
+            const hslString = (hue, saturation, lightness) => `hsl(${hue}, ${saturation}%, ${lightness}%)`
+
+            class Color {
+                constructor(name, hue, saturation, lightness) {
+                    this.name = name;
+                    this.hue = hue;
+                    this.saturation = saturation;
+                    this.lightness = lightness;
+                }
+            }
+
+            const colors = [
+                new Color("Alizarin Crimson", 349, 53, 50),
+                new Color("Cadmium Red", 357, 97, 50),
+                new Color("Cadmium Orange", 32, 95, 50),
+                new Color("Cadmium Yellow", 40, 95, 50),
+                new Color("Winsor Lemon", 54, 90, 70),
+                new Color("Sap Green", 86, 42, 55),
+                new Color("Green Gold", 59, 61, 65),
+                new Color("Winsor Green", 172, 76, 44),
+                new Color("Winsor Blue", 203, 82, 50),
+                new Color("Ultramarine", 221, 77, 42),
+                new Color("Winsor Violet", 257, 53, 36),
+                new Color("Yellow Ochre", 34, 59, 70),
+                new Color("Venetian Red", 10, 43, 70),
+                new Color("Vandyke Brown", 21, 34, 41),
+                new Color("Raw Umber", 34, 50, 60),
+                new Color("Ivory Black", 30, 4, 25)
+            ];
+
+            let displayedColors = [];
+
+            const writeStateToPath = () => {
+                const url = new URL(window.location);
+                url.searchParams.set('c', JSON.stringify(displayedColors.map(dc => colors.indexOf(dc))));
+                history.replaceState(null, document.title, url.toString());
+            }
+
+            const getStateFromPath = () => {
+                const url = new URL(window.location);
+                const queryParamValue = url.searchParams.get('c');
+                if (queryParamValue == null) {
+                    return [];
+                }
+                return JSON.parse(queryParamValue);
+            }
+
+            const toggleColor = (idx, state) => {
+                const newColor = colors[idx];
+                if (state) {
+                    displayedColors.push(newColor);
+                } else {
+                    // Workaround for duplisering
+                    displayedColors = [...new Set(displayedColors.filter(c => c != newColor))] ;
+                }
+                redrawCanvas();
+            };
+
+            const addColor = (color, idx) => {
+
+                const container = document.createElement("div");
+                container.className = "color-container";
+
+                const checkbox = document.createElement("input");
+                checkbox.type = 'checkbox';
+                checkbox.className = 'color-checkbox';
+                checkbox.onclick = (event) => {
+                    const checked = event.target.checked;
+                    toggleColor(idx, checked);
+                };
+                container.appendChild(checkbox);
+
+                const preview = document.createElement("div");
+                preview.className = "color-preview";
+                preview.style.backgroundColor = hslString(color.hue, color.saturation, color.lightness);
+                container.appendChild(preview);
+
+                const text = document.createElement("div");
+                text.className = "color-text";
+                text.innerText = color.name;
+                container.appendChild(text);
+
+
+                document.getElementById("color-selector").appendChild(container);
+            };
+
+            const polarToCart = (radius, angle) => [radius * Math.cos(angle), radius * Math.sin(angle)];
+
+            const drawSegment = (ctx, color, radiusStart, radiusLength, angleStart, angleLength) => {
+                const coords = [
+                    polarToCart(radiusStart, angleStart),
+                    polarToCart(radiusStart, angleStart + angleLength),
+                    polarToCart(radiusStart + radiusLength, angleStart + angleLength),
+                    polarToCart(radiusStart + radiusLength, angleStart)
+                ];
+
+                ctx.beginPath();
+                ctx.fillStyle = color;
+                const path = new Path2D();
+                path.arc(0, 0, radiusStart, angleStart, angleStart + angleLength, false);
+                path.arc(0, 0, radiusStart + radiusLength, angleStart + angleLength, angleStart, true);
+                
+                ctx.fill(path);
+            };
+
+            const hslToCanvasCoord = (color) => {
+                return polarToCart(450 * color.saturation / 100, color.hue / 180 * Math.PI - 0.5 * Math.PI);
+            };
+
+            const drawColorWheel = (ctx) => {
+
+                const radialSegments = 18;
+                const angularSegments = 36;
+
+                ctx.beginPath();
+                ctx.fillStyle = hslString(0, 0, 50);
+                ctx.arc(0, 0, 0.5 / radialSegments * 1.05, 0, 2 * Math.PI, false); 
+                ctx.fill();
+
+                for (let r = 1; r < radialSegments; r++) {
+                    for (let a = 0; a < angularSegments; a++) {
+                        const radiusLength = 0.5 / radialSegments;
+                        const angleLength = 2 * Math.PI / angularSegments;
+                        drawSegment(
+                            ctx, 
+                            hslString(360 * (a / angularSegments), 100 * ((r + 0.5) / radialSegments), 50), 
+                            radiusLength * r, 
+                            radiusLength * 1.02, 
+                            angleLength * a + (- Math.PI / 2 - (Math.PI / angularSegments)), 
+                            angleLength * (1.02 + (radialSegments - r) / 100 )
+                        )
+                    }
+                }
+            };
+
+            const sign = (p1, p2, p3) => {
+                return (p1[0] - p3[0]) * (p2[1] - p3[1]) - (p2[0] - p3[0]) * (p1[1] - p3[1]);
+            };
+
+            const isInTriangle = (point, t1, t2, t3) => {
+               
+                const d1 = sign(point, t1, t2);
+                const d2 = sign(point, t2, t3);
+                const d3 = sign(point, t3, t1);
+
+                const neg = (d1 < 0) || (d2 < 0) || (d3 < 0);
+                const pos = (d1 > 0) || (d2 > 0) || (d3 > 0);
+
+                return !(neg && pos);
+            };
+
+            const isInColors = (color, colors) => {
+                const point = hslToCanvasCoord(color);
+                const otherPoints = colors.map(c => hslToCanvasCoord(c));
+
+                for (let i = 0; i < colors.length; i++) {
+                    for (let j = 0; j < colors.length; j++) {
+                        if (i === j) {
+                            continue;
+                        }
+                        for (let k = 0; k < colors.length; k++) {
+                            if (i === k || j === k) {
+                                continue;
+                            }
+
+                            if (isInTriangle(point, otherPoints[i], otherPoints[j], otherPoints[k])) {
+                                return true;
+                            }
+                        }
+                    }
+                }
+                
+                return false;
+            }
+
+            const sortColors = (colors) => {
+                const sorted = [];
+                let unsortedColors = [...colors]
+                if (colors.length >= 1) {
+                    sorted.push(unsortedColors.pop());
+                }
+
+                for (let i = 0; i < colors.length - 1; i++) {
+                    const start = hslToCanvasCoord(sorted[sorted.length - 1]);
+                    let nextColorIdx = 0;
+                    let nextColor = hslToCanvasCoord(unsortedColors[0]);
+
+                    for (let j = 1; j < unsortedColors.length; j++) {
+                        let candidate = hslToCanvasCoord(unsortedColors[j]);
+                        const s = sign(candidate, start, nextColor);
+                        if (s > 0) {
+                            nextColorIdx = j;
+                            nextColor = candidate;
+                        }
+                    }
+
+                    sorted.push(unsortedColors[nextColorIdx]);
+                    unsortedColors = unsortedColors.filter((c, idx) => idx != nextColorIdx);
+                }
+
+                return sorted;
+            }
+
+            const drawGamut = (ctx, colors) => {
+                ctx.fillStyle = 'black';
+                ctx.font = '20px Verdana';
+                ctx.beginPath();
+                const path = new Path2D();
+
+                const internalColors = [];
+                const externalColors = [];
+
+                colors.forEach((color, idx) => {
+                    const otherColors = colors.filter((otherColor, otherIdx) => otherIdx !== idx);
+                    if (isInColors(color, otherColors)) {
+                        internalColors.push(color);
+                    } else {
+                        externalColors.push(color);
+                    }
+                });
+
+                internalColors.forEach(color => {
+                    const coords = hslToCanvasCoord(color);
+                    ctx.beginPath();
+                    ctx.fillStyle = hslString(0, 0, 0);
+                    ctx.arc(coords[0], coords[1], 3, 0, 2 * Math.PI, false); 
+                    ctx.fill();
+                    ctx.fillText(color.name, coords[0], coords[1]);
+                });
+
+                const sortedColors = sortColors(externalColors);
+
+                sortedColors.forEach((color, idx) => {
+                    const coords = hslToCanvasCoord(color);
+                    if (idx == 0) {
+                        path.moveTo(coords[0], coords[1]);
+                    } else {
+                        path.lineTo(coords[0], coords[1]);
+                    }
+                    ctx.beginPath();
+                    ctx.fillStyle = hslString(0, 0, 0);
+                    ctx.arc(coords[0], coords[1], 3, 0, 2 * Math.PI, false); 
+                    ctx.fill();
+                    ctx.fillText(color.name, coords[0], coords[1]);
+                });
+                path.closePath();
+                ctx.stroke(path);
+            };
+
+            const redrawCanvas = () => {
+                const canvas = document.getElementById("color-wheel")
+                const ctx = canvas.getContext("2d");
+                ctx.setTransform(1, 0, 0, 1, 0, 0);
+                ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+                ctx.translate(500, 500);
+                ctx.scale(900, 900);
+                drawColorWheel(ctx);
+                ctx.scale(1/900, 1/900);
+                drawGamut(ctx, displayedColors);
+            };
+
+            const enableColors = (colors) => {
+                document.querySelectorAll('.color-checkbox')
+                    .forEach((node, idx) => {
+                        const state = colors.includes(idx);
+                        toggleColor(idx, state);
+                        node.checked = state;
+                    });
+            }
+
+            const randomTriad = () => {
+
+                const black = new Color('Black', 0, 0, 0);
+
+                const containsBlack = (triad) => {
+                    const blackCount = triad.filter(c => c.saturation < 10).length;
+                    return blackCount == 1 || isInColors(black, triad.map(idx => colors[idx]));
+                }
+
+                let triad = [];
+                while(!containsBlack(triad)) {
+                    triad = [];
+                    let availableColors = [...colors].map((value, idx) => idx);
+                    for (let i = 0; i < 3; i++) {
+                        const randomInt = Math.floor(Math.random() * availableColors.length);
+                        triad.push(availableColors[randomInt]);
+                        availableColors = availableColors.filter((c, idx) => idx != randomInt);
+                    }
+                }
+                
+
+                enableColors(triad);
+                    
+            };
+
+            const init = () => {
+                colors.forEach(addColor)
+
+                document.getElementById("random-button").onclick = randomTriad;
+                document.getElementById("save-button").onclick = writeStateToPath;
+                
+                enableColors(getStateFromPath());
+            };
+
+            document.addEventListener('DOMContentLoaded', init, false);
+        </script>
+    </head>
+    <body>
+        <div class="content">
+            <div id="menu">
+                <div id="color-selector"></div>
+                <button id="random-button">Random triad</button>
+                <button id="save-button">Save palette</button>
+            </div>
+            
+            <canvas id="color-wheel" width="1000" height="1000"></canvas>
+        </div>
+    </body>
+</html>
