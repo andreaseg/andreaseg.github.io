@@ -9,7 +9,7 @@
                 display: flex;
             }
 
-            .color-container {
+            .color-container > label {
                 display: flex;
             }
 
@@ -84,6 +84,8 @@
                 const container = document.createElement("div");
                 container.className = "color-container";
 
+                const label = document.createElement("label");
+
                 const checkbox = document.createElement("input");
                 checkbox.type = 'checkbox';
                 checkbox.className = 'color-checkbox';
@@ -91,18 +93,19 @@
                     const checked = event.target.checked;
                     toggleColor(idx, checked);
                 };
-                container.appendChild(checkbox);
+                label.appendChild(checkbox);
 
                 const preview = document.createElement("div");
                 preview.className = "color-preview";
                 preview.style.backgroundColor = hslString(color.hue, color.saturation, color.lightness);
-                container.appendChild(preview);
+                label.appendChild(preview);
 
                 const text = document.createElement("div");
                 text.className = "color-text";
                 text.innerText = color.name;
-                container.appendChild(text);
+                label.appendChild(text);
 
+                container.appendChild(label);
 
                 document.getElementById("color-selector").appendChild(container);
             };
