@@ -51,42 +51,57 @@
 
             const hslString = (hue, saturation, lightness) => `hsl(${hue}, ${saturation}%, ${lightness}%)`
 
+            const colorGroups = {
+                normal: 0,
+                earth: 1,
+                black: 2,
+            };
+
             class Color {
-                constructor(name, hue, saturation, lightness) {
+                constructor(name, hue, saturation, lightness, colorGroup, useInRng) {
                     this.name = name;
                     this.hue = hue;
                     this.saturation = saturation;
                     this.lightness = lightness;
+                    this.colorGroup = colorGroup;
+                    this.useInRng = useInRng
                 }
             }
 
+            
+
             const colors = [
-                //new Color("Q. Rose Magenta", 341, 81, 75),
-                new Color("Alizarin Crimson", 349, 53, 50),
-                new Color("Cadmium Red", 357, 97, 50),
-                new Color("Cadmium Orange", 32, 95, 50),
-                new Color("Cadmium Yellow", 40, 95, 50),
-                //new Color("Indian Yellow", 47, 90, 60),
-                new Color("Winsor Lemon", 54, 90, 70),
-                new Color("Sap Green", 86, 42, 55),
-                new Color("Green Gold", 59, 61, 65),
-                new Color("Winsor Green", 172, 76, 44),
-                //new Color("Phthalo Green", 175, 84, 69),
-                //new Color("Prussian Blue", 203, 72, 68),
-                new Color("Winsor Blue", 203, 82, 50),
-                //new Color("Indigo", 214, 28, 58),
-                new Color("Ultramarine", 221, 77, 42),
-                //new Color("Smalt", 246, 25, 68),
-                new Color("Winsor Violet", 257, 53, 36),
-                new Color("Yellow Ochre", 34, 59, 70),
-                new Color("Venetian Red", 10, 43, 70),
-                new Color("Vandyke Brown", 21, 34, 41),
-                //new Color("Burnt Sienna", 25, 61, 79),
-                //new Color("Raw Sienna", 33, 38, 85),
-                new Color("Raw Umber", 34, 50, 60),
-                new Color("Ivory Black", 30, 4, 25),
-                //new Color("Neutral Tint", 221, 9, 53),
+                new Color("Alizarin Crimson", 349, 53, 50, colorGroups.normal, true),
+                new Color("Cadmium Red", 357, 97, 50, colorGroups.normal, true),
+                new Color("Cadmium Orange", 32, 95, 50, colorGroups.normal, true),
+                new Color("Cadmium Yellow", 40, 95, 50, colorGroups.normal, true),
+                new Color("Winsor Lemon", 54, 90, 70, colorGroups.normal, true),
+                new Color("Sap Green", 86, 42, 55, colorGroups.normal, true),
+                new Color("Green Gold", 59, 61, 65, colorGroups.normal, true),
+                new Color("Winsor Green", 172, 76, 44, colorGroups.normal, true),
+                new Color("Winsor Blue", 203, 82, 50, colorGroups.normal, true),
+                new Color("Ultramarine", 221, 77, 42, colorGroups.normal, true),
+                new Color("Winsor Violet", 257, 53, 36, colorGroups.normal, true),
+                new Color("Yellow Ochre", 34, 59, 70, colorGroups.earth, true),
+                new Color("Venetian Red", 10, 43, 70, colorGroups.earth, true),
+                new Color("Vandyke Brown", 21, 34, 41, colorGroups.earth, true),
+                new Color("Raw Umber", 34, 50, 60, colorGroups.earth, true),
+                new Color("Ivory Black", 30, 4, 25, colorGroups.black, true),
+                new Color("Burnt Sienna", 25, 61, 79, colorGroups.earth, false),
+                new Color("Raw Sienna", 33, 38, 85, colorGroups.earth, false),
+                new Color("Neutral Tint", 221, 9, 53, colorGroups.black, false),
+                new Color("Smalt", 246, 25, 68, colorGroups.normal, false),
+                new Color("Indigo", 214, 28, 58, colorGroups.normal, false),
+                new Color("Phthalo Green", 175, 84, 69, colorGroups.normal, false),
+                new Color("Prussian Blue", 203, 72, 68, colorGroups.normal, false),
+                new Color("Indian Yellow", 47, 90, 60, colorGroups.normal, false),
+                new Color("Q. Rose Magenta", 341, 81, 75, colorGroups.normal, false),
             ];
+
+            const rngColors = colors
+                .map((color, idx) => [color, idx])
+                .filter(([color, idx]) => color.useInRng)
+                .map(([_, idx]) => idx);
 
             let displayedColors = [];
 
@@ -116,7 +131,9 @@
                 }
             };
 
-            const addColor = (color, idx) => {
+            const addColor = (color) => {
+
+                const idx = colors.findIndex(c => c == color);
 
                 const container = document.createElement("div");
                 container.className = "color-container";
@@ -126,6 +143,7 @@
                 const checkbox = document.createElement("input");
                 checkbox.type = 'checkbox';
                 checkbox.className = 'color-checkbox';
+                checkbox.id = `color-checkbox-${idx}`;
                 checkbox.onclick = (event) => {
                     const checked = event.target.checked;
                     toggleColor(idx, checked);
@@ -325,7 +343,8 @@
 
             const enableColors = (colors) => {
                 document.querySelectorAll('.color-checkbox')
-                    .forEach((node, idx) => {
+                    .forEach((node) => {
+                        const idx = parseInt(node.id.substring("color-checkbox-".length));
                         const state = colors.includes(idx);
                         toggleColor(idx, state);
                         node.checked = state;
@@ -335,7 +354,7 @@
 
             const pickNRandomColors = (n) => {
                 const picked = [];
-                let availableColors = [...colors].map((value, idx) => idx);
+                let availableColors = [...rngColors];
                 for (let i = 0; i < n; i++) {
                     const randomInt = Math.floor(Math.random() * availableColors.length);
                     picked.push(availableColors[randomInt]);
@@ -429,7 +448,7 @@
             };
 
             const fullPalette = () => {
-                let allColors = [...colors].map((value, idx) => idx);
+                let allColors = rngColors.map((value, idx) => idx);
                 enableColors(allColors);
             };
 
@@ -438,7 +457,9 @@
             }
 
             const init = () => {
-                colors.forEach(addColor)
+                [...colors]
+                    .sort((c1, c2) => (c1.colorGroup * 1000 + (c1.hue + 5) % 360) > (c2.colorGroup * 1000 + (c2.hue + 5) % 360))
+                    .forEach(addColor)
 
                 document.getElementById("random-button").onclick = randomTriad;
                 document.getElementById("all-button").onclick = fullPalette;
