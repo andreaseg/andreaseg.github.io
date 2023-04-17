@@ -30,6 +30,10 @@
                     this.saturation = saturation;
                     this.lightness = lightness;
                 }
+
+                toString() {
+                    return `${this.name}`;
+                }
             }
 
             const colors = [
@@ -55,7 +59,7 @@
 
             const writeStateToPath = () => {
                 const url = new URL(window.location);
-                url.searchParams.set('c', JSON.stringify(displayedColors.map(dc => colors.indexOf(dc))));
+                url.searchParams.set('c', JSON.stringify([...new Set(displayedColors)].map(dc => colors.indexOf(dc))));
                 history.replaceState(null, document.title, url.toString());
             }
 
@@ -71,12 +75,12 @@
             const toggleColor = (idx, state) => {
                 const newColor = colors[idx];
                 if (state) {
-                    displayedColors.push(newColor);
+                    const copy = new Set(displayedColors);
+                    copy.add(newColor);
+                    displayedColors = [...copy];
                 } else {
-                    // Workaround for duplisering
-                    displayedColors = [...new Set(displayedColors.filter(c => c != newColor))] ;
+                    displayedColors = displayedColors.filter(c => c != newColor) ;
                 }
-                redrawCanvas();
             };
 
             const addColor = (color, idx) => {
@@ -92,6 +96,7 @@
                 checkbox.onclick = (event) => {
                     const checked = event.target.checked;
                     toggleColor(idx, checked);
+                    redrawCanvas();
                 };
                 label.appendChild(checkbox);
 
@@ -274,6 +279,7 @@
             };
 
             const redrawCanvas = () => {
+                console.log("Redrawing canvas", displayedColors);
                 const canvas = document.getElementById("color-wheel")
                 const ctx = canvas.getContext("2d");
                 ctx.setTransform(1, 0, 0, 1, 0, 0);
@@ -293,7 +299,9 @@
                         toggleColor(idx, state);
                         node.checked = state;
                     });
+                redrawCanvas();
             }
+            
 
             const randomTriad = () => {
 
