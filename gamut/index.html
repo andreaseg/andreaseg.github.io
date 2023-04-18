@@ -32,7 +32,7 @@
                 width: 10em;
             }
 
-            #palette-presets > button {
+            #palette-presets button {
                 display: block;
                 margin: auto;
             }
@@ -63,64 +63,107 @@
             };
 
             class Color {
-                constructor(name, brand, hue, saturation, lightness, colorGroup, useInRng) {
+                constructor(name, brand, hue, saturation, lightness, colorGroup) {
                     this.brand = brand;
                     this.name = name;
                     this.hue = hue;
                     this.saturation = saturation;
                     this.lightness = lightness;
                     this.colorGroup = colorGroup;
-                    this.useInRng = useInRng
                 }
             }
 
             
 
             const colors = [
-                new Color("Alizarin Crimson", "WN", 349, 53, 50, colorGroups.normal, true),
-                new Color("Cadmium Red", "WN", 357, 97, 50, colorGroups.normal, true),
-                new Color("Cadmium Orange", "WN", 32, 95, 50, colorGroups.normal, true),
-                new Color("Cadmium Yellow", "WN", 40, 95, 50, colorGroups.normal, true),
-                new Color("Winsor Lemon", "WN", 54, 90, 70, colorGroups.normal, true),
-                new Color("Sap Green", "WN", 86, 42, 55, colorGroups.normal, true),
-                new Color("Green Gold", "DS", 59, 61, 65, colorGroups.normal, true),
-                new Color("Winsor Green", "WN", 172, 76, 44, colorGroups.normal, true),
-                new Color("Winsor Blue", "WN", 203, 82, 50, colorGroups.normal, true),
-                new Color("Ultramarine", "R", 221, 77, 42, colorGroups.normal, true),
-                new Color("Winsor Violet", "WN", 257, 53, 36, colorGroups.normal, true),
-                new Color("Yellow Ochre", "WN", 34, 59, 70, colorGroups.earth, true),
-                new Color("Venetian Red", "WN", 10, 43, 70, colorGroups.earth, true),
-                new Color("Vandyke Brown", "WN", 21, 34, 41, colorGroups.earth, true),
-                new Color("Raw Umber", "WN", 34, 50, 60, colorGroups.earth, true),
-                new Color("Ivory Black", "WN", 30, 4, 25, colorGroups.black, true),
-                new Color("Alizarin Crimson", "R", 353, 49, 48, colorGroups.normal, true),
-                new Color("Burnt Sienna", "R", 25, 61, 79, colorGroups.earth, false),
-                new Color("Raw Sienna", "R", 33, 38, 85, colorGroups.earth, false),
-                new Color("Neutral Tint", "R", 221, 9, 53, colorGroups.black, false),
-                new Color("Smalt", "WN", 246, 25, 68, colorGroups.normal, false),
-                new Color("Indigo", "R", 214, 28, 58, colorGroups.normal, false),
-                new Color("Phtalo Green", "R", 175, 84, 69, colorGroups.normal, false),
-                new Color("Prussian Blue", "R", 203, 72, 68, colorGroups.normal, false),
-                new Color("Indian Yellow", "R", 47, 90, 60, colorGroups.normal, false),
-                new Color("Q. Rose Magenta", "R", 341, 81, 75, colorGroups.normal, false),
-                new Color("Lemon Yellow", "S", 58, 86, 53, colorGroups.normal, false),
-                new Color("Q. Gold Hue", "S", 36, 78, 49, colorGroups.normal, false),
-                new Color("Transparent Orange", "S", 25, 93, 45, colorGroups.normal, false),
-                new Color("Geranium Red", "S", 8, 83, 57, colorGroups.normal, false),
-                new Color("Magenta", "S", 344, 64, 47, colorGroups.normal, false),
-                new Color("Perylene Violet", "S", 346, 50, 22, colorGroups.normal, false),
-                new Color("French Ultramarine", "S", 224, 76, 57, colorGroups.normal, false),
-                new Color("Helio Cerulean", "S", 205, 98, 37, colorGroups.normal, false),
-                new Color("Phtalo Green", "S", 169, 99, 28, colorGroups.normal, false),
-                new Color("May Green", "S", 83, 57, 53, colorGroups.normal, false),
-                new Color("Perylene Green", "S", 80, 9, 29, colorGroups.normal, false),
-                new Color("Neutral Tint", "S", 309, 10, 28, colorGroups.black, false),
+                new Color("Alizarin Crimson", "WN", 349, 53, 50, colorGroups.normal),
+                new Color("Cadmium Red", "WN", 357, 97, 50, colorGroups.normal),
+                new Color("Cadmium Orange", "WN", 32, 95, 50, colorGroups.normal),
+                new Color("Cadmium Yellow", "WN", 40, 95, 50, colorGroups.normal),
+                new Color("Winsor Lemon", "WN", 54, 90, 70, colorGroups.normal),
+                new Color("Sap Green", "WN", 86, 42, 55, colorGroups.normal),
+                new Color("Green Gold", "DS", 59, 61, 65, colorGroups.normal),
+                new Color("Winsor Green", "WN", 172, 76, 44, colorGroups.normal),
+                new Color("Winsor Blue", "WN", 203, 82, 50, colorGroups.normal),
+                new Color("Ultramarine", "R", 221, 77, 42, colorGroups.normal),
+                new Color("Winsor Violet", "WN", 257, 53, 36, colorGroups.normal),
+                new Color("Yellow Ochre", "WN", 34, 59, 70, colorGroups.earth),
+                new Color("Venetian Red", "WN", 10, 43, 70, colorGroups.earth),
+                new Color("Vandyke Brown", "WN", 21, 34, 41, colorGroups.earth),
+                new Color("Raw Umber", "WN", 34, 50, 60, colorGroups.earth),
+                new Color("Ivory Black", "WN", 30, 4, 25, colorGroups.black),
+                new Color("Alizarin Crimson", "R", 353, 49, 48, colorGroups.normal),
+                new Color("Burnt Sienna", "R", 25, 61, 79, colorGroups.earth),
+                new Color("Raw Sienna", "R", 33, 38, 85, colorGroups.earth),
+                new Color("Neutral Tint", "R", 221, 9, 53, colorGroups.black),
+                new Color("Smalt", "WN", 246, 25, 68, colorGroups.normal),
+                new Color("Indigo", "R", 214, 28, 58, colorGroups.normal),
+                new Color("Phtalo Green", "R", 175, 84, 69, colorGroups.normal),
+                new Color("Prussian Blue", "R", 203, 72, 68, colorGroups.normal),
+                new Color("Indian Yellow", "R", 47, 90, 60, colorGroups.normal),
+                new Color("Q. Rose Magenta", "R", 341, 81, 75, colorGroups.normal),
+                new Color("Lemon Yellow", "S", 58, 86, 53, colorGroups.normal),
+                new Color("Q. Gold Hue", "S", 36, 78, 49, colorGroups.normal),
+                new Color("Transparent Orange", "S", 25, 93, 45, colorGroups.normal),
+                new Color("Geranium Red", "S", 8, 83, 57, colorGroups.normal),
+                new Color("Magenta", "S", 344, 64, 47, colorGroups.normal),
+                new Color("Perylene Violet", "S", 346, 50, 22, colorGroups.normal),
+                new Color("French Ultramarine", "S", 224, 76, 57, colorGroups.normal),
+                new Color("Helio Cerulean", "S", 205, 98, 37, colorGroups.normal),
+                new Color("Phtalo Green", "S", 169, 99, 28, colorGroups.normal),
+                new Color("May Green", "S", 83, 57, 53, colorGroups.normal),
+                new Color("Perylene Green", "S", 80, 9, 29, colorGroups.normal),
+                new Color("Neutral Tint", "S", 309, 10, 28, colorGroups.black),
             ];
 
-            const rngColors = colors
-                .map((color, idx) => [color, idx])
-                .filter(([color, idx]) => color.useInRng)
-                .map(([_, idx]) => idx);
+            const palettes = {
+                palette1: [
+                    "WN Alizarin Crimson",
+                    "WN Cadmium Red",
+                    "WN Cadmium Orange",
+                    "WN Cadmium Yellow",
+                    "WN Winsor Lemon",
+                    "WN Sap Green",
+                    "DS Green Gold",
+                    "WN Winsor Green",
+                    "WN Winsor Blue",
+                    "R Ultramarine",
+                    "WN Winsor Violet",
+                    "WN Yellow Ochre",
+                    "WN Venetian Red",
+                    "WN Vandyke Brown",
+                    "WN Raw Umber",
+                    "WN Ivory Black",
+                ],
+                palette2: [
+                    "R Ultramarine",
+                    "R Burnt Sienna",
+                    "R Raw Sienna",
+                    "R Neutral Tint",
+                    "R Indigo",
+                    "R Phtalo Green",
+                    "R Prussian Blue",
+                    "R Indian Yellow",
+                    "R Q. Rose Magenta",
+                    "R Alizarin Crimson",
+                ],
+                palette3: [
+                    "S Lemon Yellow",
+                    "S Q. Gold Hue",
+                    "S Transparent Orange",
+                    "S Geranium Red",
+                    "S Magenta",
+                    "S Perylene Violet",
+                    "S French Ultramarine",
+                    "S Helio Cerulean",
+                    "S Phtalo Green",
+                    "S May Green",
+                    "S Perylene Green",
+                    "S Neutral Tint",
+                ]
+            };
+
+            let rngColors = undefined;
 
             let displayedColors = [];
 
@@ -315,7 +358,6 @@
 
                 const duplicates = {};
                 colors.forEach(c => duplicates[c.name] = (duplicates[c.name] || 0) + 1);
-                console.log(duplicates)
 
                 const internalColors = [];
                 const externalColors = [];
@@ -483,70 +525,56 @@
                 paletteFromLimited(palette);
             };
 
-            const palette1 = () => {
-                const palette = [
-                    "WN Alizarin Crimson",
-                    "WN Cadmium Red",
-                    "WN Cadmium Orange",
-                    "WN Cadmium Yellow",
-                    "WN Winsor Lemon",
-                    "WN Sap Green",
-                    "DS Green Gold",
-                    "WN Winsor Green",
-                    "WN Winsor Blue",
-                    "R Ultramarine",
-                    "WN Winsor Violet",
-                    "WN Yellow Ochre",
-                    "WN Venetian Red",
-                    "WN Vandyke Brown",
-                    "WN Raw Umber",
-                    "WN Ivory Black",
-                ];
-                paletteFromLimited(palette);
-            };
-
-            const palette2 = () => {
-                const palette = [
-                    "R Ultramarine",
-                    "R Burnt Sienna",
-                    "R Raw Sienna",
-                    "R Neutral Tint",
-                    "R Indigo",
-                    "R Phtalo Green",
-                    "R Prussian Blue",
-                    "R Indian Yellow",
-                    "R Q. Rose Magenta",
-                    "R Alizarin Crimson",
-                ];
-                paletteFromLimited(palette);
-            };
-
-            const palette3 = () => {
-                const palette = [
-                    "S Lemon Yellow",
-                    "S Q. Gold Hue",
-                    "S Transparent Orange",
-                    "S Geranium Red",
-                    "S Magenta",
-                    "S Perylene Violet",
-                    "S French Ultramarine",
-                    "S Helio Cerulean",
-                    "S Phtalo Green",
-                    "S May Green",
-                    "S Perylene Green",
-                    "S Neutral Tint",
-                ];
-                paletteFromLimited(palette);
-            };
-
             const fullPalette = () => {
-                let allColors = colors.map((value, idx) => idx);
-                enableColors(allColors);
+                paletteFromLimited(rngColors.map(idx => colors[idx]).map(c => `${c.brand} ${c.name}`));
             };
 
             const clearPalette = () => {
                 enableColors([]);
-            }
+            };
+
+            const setPalette = (name) => {
+                if (name == undefined) {
+                    const radios = document.querySelectorAll('.radio-palette');
+                    for (let i = 0; i < radios.length; i++) {
+                        const radio = radios[i];
+                        if (!radio.checked) {
+                            continue
+                        }
+                        setPalette(radio.value);
+                        return;
+                    }
+                    return;
+                }
+                console.log(`Setting palette to '${name}'`)
+                
+                let newPalette = undefined;
+                switch (name) {
+                    case '1':
+                        newPalette = palettes.palette1;
+                        break;
+                    case '2':
+                        newPalette = palettes.palette2;
+                        break;
+                    case '3':
+                        newPalette = palettes.palette3;
+                        break;
+                    case 'all':
+                        newPalette = colors.map(c => `${c.brand} ${c.name}`);
+                        break;
+                    default:
+                        console.error(`Unhandled palette ${name}`);
+                        newPalette = [];
+                }
+
+                rngColors = colors
+                    .map((c, idx) => [c, idx])
+                    .filter(([c, _]) => newPalette.includes(`${c.brand} ${c.name}`))
+                    .map(([_, idx]) => idx);
+
+                fullPalette();
+                    
+            };
 
             const init = () => {
                 [...colors]
@@ -554,18 +582,23 @@
                     .forEach(addColor)
 
                 document.getElementById("random-button").onclick = randomTriad;
-                document.getElementById("all-button").onclick = fullPalette;
                 document.getElementById("fowkes").onclick = fowkesLimited;
                 document.getElementById("random-comp").onclick = complementary;
                 document.getElementById("zorn").onclick = zornLimited;
-                document.getElementById("palette1").onclick = palette1;
-                document.getElementById("palette2").onclick = palette2;
-                document.getElementById("palette3").onclick = palette3;
 
                 document.getElementById("save-button").onclick = writeStateToPath;
                 document.getElementById("clear-button").onclick = clearPalette;
+
+                document.querySelectorAll('.radio-palette').forEach(node => {
+                    node.onclick = (event) => setPalette(event.target.value);
+                });
+                setPalette();
                 
                 enableColors(getStateFromPath());
+
+                if (displayedColors.length == 0) {
+                    fullPalette();
+                }
             };
 
             document.addEventListener('DOMContentLoaded', init, false);
@@ -579,19 +612,29 @@
                     <div id="color-selector"></div>
                 </fieldset>
                 
-                <fieldset>
-                    <legend>Preset</legend>
-                    <div id="palette-presets">
+                
+                <div id="palette-presets">
+                    <fieldset>
+                        <legend>Palette</legend>
+                        <input type="radio" id="radio-palette-1" class="radio-palette" name="p" value="1" checked>
+                        <label for="radio-palette-1">#1</label>
+                        <input type="radio" id="radio-palette-2" class="radio-palette" name="p" value="2">
+                        <label for="radio-palette-2">#2</label>
+                        <input type="radio" id="radio-palette-3" class="radio-palette" name="p" value="3">
+                        <label for="radio-palette-3">#3</label>
+                        <input type="radio" id="radio-palette-all" class="radio-palette" name="p" value="all">
+                        <label for="radio-palette-all">Full</label>
                         <button id="random-comp">Complementary</button>
                         <button id="random-button">Triad</button>
+                    </fieldset>
+                        
+                    <fieldset>
+                        <legend>Preset</legend>
                         <button id="fowkes">Fowkes limited</button>
                         <button id="zorn">Zorn limited</button>
-                        <button id="palette1">Palette 1</button>
-                        <button id="palette2">Palette 2</button>
-                        <button id="palette3">Palette 3</button>
-                        <button id="all-button">Full palette</button>
-                    </div>
-                </fieldset>
+                    </fieldset>
+                </div>
+                
                 
                 
                 <button id="save-button">Save palette</button>
