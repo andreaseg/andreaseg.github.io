@@ -114,6 +114,8 @@
                 new Color("May Green", "S", 83, 57, 53, colorGroups.normal),
                 new Color("Perylene Green", "S", 80, 9, 29, colorGroups.normal),
                 new Color("Neutral Tint", "S", 309, 10, 28, colorGroups.black),
+                new Color("Moonglow", "DS", 255, 29, 41, colorGroups.black),
+                new Color("P. Green Light", "DS", 116, 48, 52, colorGroups.normal),
             ];
 
             const palettes = {
@@ -134,6 +136,8 @@
                     "WN Vandyke Brown",
                     "WN Raw Umber",
                     "WN Ivory Black",
+                    "DS Moonglow",
+                    "DS P. Green Light"
                 ],
                 palette2: [
                     "R Ultramarine",
@@ -430,6 +434,24 @@
                 redrawCanvas();
             }
 
+            const vectorDistance = (v1, v2) => {
+                return Math.sqrt(Math.pow(v2[0] - v1[0], 2) + Math.pow(v2[1] - v1[1], 2));
+            }
+
+            const vectorSub = (v1, v2) => {
+                return [v2[0] - v1[0], v2[1] - v1[1]];
+            }
+
+            const distanceToLine = (color1, color2, point) => {
+                const origo = point == undefined ? [0, 0] : hslToCanvasCoord(point);
+                const a = hslToCanvasCoord(color1);
+                const b = hslToCanvasCoord(color2);
+                const l = vectorDistance(a, b);
+                const d = Math.abs((b[0] - a[0])*(a[1] - origo[1]) - (a[0] - origo[0])*(b[1] - a[1])) / l;
+
+                return [d, l, a, b];
+            }
+
             const pickNRandomColors = (n) => {
                 const picked = [];
                 let availableColors = [...rngColors];
@@ -446,13 +468,32 @@
 
                 const black = new Color('Black', 0, 0, 0);
 
-                const containsBlack = (triad) => {
-                    const blackCount = triad.filter(c => colors[c].saturation < 10).length;
-                    return blackCount == 1 || isInColors(black, triad.map(idx => colors[idx]));
+                const isTriad = (triad) => {
+                    if (triad.length !== 3) {
+                        return false;
+                    }
+
+                    const triadColors = triad.map(idx => colors[idx])
+                    const blackCount = triad.filter(c => colors[c].colorGroup == colorGroups.black).length;
+                    const mixesBlack = blackCount == 1 || isInColors(black, triadColors);
+                    if (!mixesBlack) {
+                        return false;
+                    }
+                    for (let i = 0; i < 3; i++) {
+                        const c1 = triadColors[i % 3];
+                        const c2 = triadColors[(i + 1) % 3];
+                        const c3 = triadColors[(i + 2) % 3];
+                        const [d, l] = distanceToLine(c1, c2, c3);
+                        if (d < 60 || 4 * d < l) {
+                            console.log(`Rejected narrow triad ${c1.name}-${c2.name}-${c3.name} height=${d}, arm=${l}`);
+                            return false;
+                        }
+                    }
+                    return true;
                 }
 
                 let triad = [];
-                while(!containsBlack(triad)) {
+                while(!isTriad(triad)) {
                     triad = pickNRandomColors(3);
                 }
                 
@@ -461,28 +502,17 @@
                     
             };
 
-            const vectorDistance = (v1, v2) => {
-                return Math.sqrt(Math.pow(v2[0] - v1[0], 2) + Math.pow(v2[1] - v1[1], 2));
-            }
-
-            const vectorSub = (v1, v2) => {
-                return [v2[0] - v1[0], v2[1] - v1[1]];
-            }
-
             const complementary = () => {
                 const isComp = (comp) => {
                     if (comp.length == 0) {
                         return false;
                     }
-                    const blackCount = comp.filter(c => colors[c].saturation < 20).length;
+                    const blackCount = comp.filter(c => colors[c].colorGroup == colorGroups.black).length;
                     if (blackCount >= 1) {
                         return false;
                     }
 
-                    const a = hslToCanvasCoord(colors[comp[0]]);
-                    const b = hslToCanvasCoord(colors[comp[1]]);
-                    const l = vectorDistance(a, b);
-                    const d = Math.abs((b[0] - a[0])*(a[1] - 0) - (a[0] - 0)*(b[1] - a[1])) / l;
+                    const [d, l, a, b] = distanceToLine(colors[comp[0]], colors[comp[1]]);
 
                     return d < 60 && vectorDistance(a, [0, 0]) < l && vectorDistance(b, [0, 0]) < l;
                 }
