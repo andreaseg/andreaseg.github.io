@@ -312,13 +312,13 @@
                 return polarToCart(450 * color.saturation / 100, color.hue / 180 * Math.PI - 0.5 * Math.PI);
             };
 
-            const drawColorWheel = (ctx) => {
+            const drawColorWheel = (ctx, lightness) => {
 
                 const radialSegments = 18;
                 const angularSegments = 36;
 
                 ctx.beginPath();
-                ctx.fillStyle = hslString(0, 0, 50);
+                ctx.fillStyle = hslString(0, 0, lightness);
                 ctx.arc(0, 0, 0.5 / radialSegments * 1.05, 0, 2 * Math.PI, false); 
                 ctx.fill();
 
@@ -328,7 +328,7 @@
                         const angleLength = 2 * Math.PI / angularSegments;
                         drawSegment(
                             ctx, 
-                            hslString(360 * (a / angularSegments), 100 * ((r + 0.5) / radialSegments), 50), 
+                            hslString(360 * (a / angularSegments), 100 * ((r + 0.5) / radialSegments), lightness), 
                             radiusLength * r, 
                             radiusLength * 1.02, 
                             angleLength * a + (- Math.PI / 2 - (Math.PI / angularSegments)), 
@@ -407,10 +407,7 @@
             }
 
             const drawGamut = (ctx, colors) => {
-                ctx.fillStyle = 'black';
-                ctx.font = '16px Verdana';
-                ctx.beginPath();
-                const path = new Path2D();
+                
 
                 const duplicates = {};
                 colors.forEach(c => duplicates[c.name] = (duplicates[c.name] || 0) + 1);
@@ -427,27 +424,47 @@
                     }
                 });
 
-                internalColors.forEach(color => {
-                    const coords = hslToCanvasCoord(color);
-                    ctx.beginPath();
-                    ctx.arc(coords[0], coords[1], 3, 0, 2 * Math.PI, false); 
-                    ctx.fill();
-                    let text = color.name;
-                    if (duplicates[color.name] > 1) {
-                        text += ` (${color.brand})`;
-                    }
-                    ctx.fillText(text, coords[0], coords[1]);
-                });
-
                 const sortedColors = sortColors(externalColors);
 
-                sortedColors.forEach((color, idx) => {
+                ctx.save();
+                if (externalColors.length > 2) {
+
+                    ctx.scale(900, 900);
+                    drawColorWheel(ctx, 25);
+                    ctx.scale(1/900, 1/900);
+
+                    ctx.beginPath();
+                    sortedColors.forEach((color, idx) => {
+                        const coords = hslToCanvasCoord(color);
+                        if (idx == 0) {
+                            ctx.moveTo(coords[0], coords[1]);
+                        } else {
+                            ctx.lineTo(coords[0], coords[1]);
+                        }
+                    });
+                    ctx.closePath();
+                    ctx.clip();
+                } 
+
+                ctx.scale(900, 900);
+                drawColorWheel(ctx, 50);
+                ctx.scale(1/900, 1/900);
+                ctx.restore();
+
+                if (externalColors.length == 2) {
+                    const a = hslToCanvasCoord(externalColors[0]);
+                    const b = hslToCanvasCoord(externalColors[1]);
+
+                    ctx.beginPath();
+                    ctx.moveTo(a[0], a[1]);
+                    ctx.lineTo(b[0], b[1]);
+                    ctx.stroke();
+                }
+
+                ctx.fillStyle = 'black';
+                ctx.font = '16px Verdana';
+                colors.forEach(color => {
                     const coords = hslToCanvasCoord(color);
-                    if (idx == 0) {
-                        path.moveTo(coords[0], coords[1]);
-                    } else {
-                        path.lineTo(coords[0], coords[1]);
-                    }
                     ctx.beginPath();
                     ctx.arc(coords[0], coords[1], 3, 0, 2 * Math.PI, false); 
                     ctx.fill();
@@ -457,8 +474,7 @@
                     }
                     ctx.fillText(text, coords[0], coords[1]);
                 });
-                path.closePath();
-                ctx.stroke(path);
+
             };
 
             const redrawCanvas = () => {
@@ -469,9 +485,6 @@
                 ctx.clearRect(0, 0, canvas.width, canvas.height);
 
                 ctx.translate(500, 500);
-                ctx.scale(900, 900);
-                drawColorWheel(ctx);
-                ctx.scale(1/900, 1/900);
                 drawGamut(ctx, displayedColors);
             };
 
