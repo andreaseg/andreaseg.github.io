@@ -156,6 +156,13 @@
                 new Color("P. Green Light", "DS", 116, 48, 52, colorGroups.normal),
             ];
 
+            const brands = {
+                "WN": "Winsor & Newton Professional",
+                "R": "Rembrandt",
+                "S": "Schmincke Horadam",
+                "DS": "Daniel Smith",
+            };
+
             const palettes = {
                 palette1: [
                     "WN Alizarin Crimson",
@@ -266,8 +273,14 @@
                 label.appendChild(text);
 
                 const brand = document.createElement("div");
-                brand.className = "brand-text";
+                brand.className = "brand-text tooltip";
                 brand.innerText = color.brand;
+
+                const tooltip = document.createElement("span");
+                tooltip.className = "tooltiptext";
+                tooltip.innerText = brands[color.brand];
+                brand.appendChild(tooltip);
+
                 label.appendChild(brand);
 
                 container.appendChild(label);
