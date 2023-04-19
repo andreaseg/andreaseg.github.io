@@ -111,7 +111,7 @@
                 }
             }
 
-            
+            const black = new Color('Black', 0, 0, 0);
 
             const colors = [
                 new Color("Alizarin Crimson", "WN", 349, 53, 50, colorGroups.normal),
@@ -154,6 +154,7 @@
                 new Color("Neutral Tint", "S", 309, 10, 28, colorGroups.black),
                 new Color("Moonglow", "DS", 255, 29, 41, colorGroups.black),
                 new Color("P. Green Light", "DS", 116, 48, 52, colorGroups.normal),
+                new Color("Light Red", "WN", 16, 71, 50, colorGroups.normal)
             ];
 
             const brands = {
@@ -513,13 +514,8 @@
                 }
                 return picked;
             }
-            
 
-            const randomTriad = () => {
-
-                const black = new Color('Black', 0, 0, 0);
-
-                const isTriad = (triad) => {
+            const isTriad = (triad) => {
                     if (triad.length !== 3) {
                         return false;
                     }
@@ -528,20 +524,24 @@
                     const blackCount = triad.filter(c => colors[c].colorGroup == colorGroups.black).length;
                     const mixesBlack = blackCount == 1 || isInColors(black, triadColors);
                     if (!mixesBlack) {
+                        console.log('Reghected due to no black');
                         return false;
                     }
                     for (let i = 0; i < 3; i++) {
                         const c1 = triadColors[i % 3];
                         const c2 = triadColors[(i + 1) % 3];
                         const c3 = triadColors[(i + 2) % 3];
-                        const [d, l] = distanceToLine(c1, c2, c3);
-                        if (d < 60 || 4 * d < l) {
-                            console.log(`Rejected narrow triad ${c1.name}-${c2.name}-${c3.name} height=${d}, arm=${l}`);
+                        const [d] = distanceToLine(c1, c2, c3);
+                        if (d < 60) {
+                            console.log(`Rejected narrow triad ${c1.name}-${c2.name}-${c3.name} height=${d}`);
                             return false;
                         }
                     }
                     return true;
                 }
+            
+
+            const randomTriad = () => {
 
                 let triad = [];
                 while(!isTriad(triad)) {
@@ -553,8 +553,7 @@
                     
             };
 
-            const complementary = () => {
-                const isComp = (comp) => {
+            const isComplementary = (comp) => {
                     if (comp.length == 0) {
                         return false;
                     }
@@ -568,8 +567,11 @@
                     return d < 60 && vectorDistance(a, [0, 0]) < l && vectorDistance(b, [0, 0]) < l;
                 }
 
+            const complementary = () => {
+                
+
                 let comp = [];
-                while(!isComp(comp)) {
+                while(!isComplementary(comp)) {
                     comp = pickNRandomColors(2);
                 }
                 
@@ -602,6 +604,15 @@
                     "WN Cadmium Red",
                     "WN Yellow Ochre",
                     "WN Ivory Black"
+                ];
+                paletteFromLimited(palette);
+            };
+
+            const ironTriad = () => {
+                const palette = [
+                    "WN Light Red",
+                    "WN Yellow Ochre",
+                    "R Prussian Blue"
                 ];
                 paletteFromLimited(palette);
             };
@@ -666,6 +677,7 @@
                 document.getElementById("fowkes").onclick = fowkesLimited;
                 document.getElementById("random-comp").onclick = complementary;
                 document.getElementById("zorn").onclick = zornLimited;
+                document.getElementById("iron-triad").onclick = ironTriad;
 
                 document.getElementById("save-button").onclick = writeStateToPath;
                 document.getElementById("clear-button").onclick = clearPalette;
@@ -712,7 +724,8 @@
                     <fieldset>
                         <legend>Preset</legend>
                         <button id="fowkes" class="tooltip">Fowkes limited<span class="tooltiptext">The limited palette from the book How to Paint Landscapes Quickly and Beautifully in Watercolor and Gouache by Nathan Fowkes.</span></button>
-                        <button id="zorn" class="tooltip">Zorn limited<span class="tooltiptext">The famous portrait palettte from Anders Zorn. For white either the white of the paper, or white designer gouache can be used.</span></button>
+                        <button id="zorn" class="tooltip">Zorn palette<span class="tooltiptext">The famous portrait palettte from Anders Zorn. For white either the white of the paper, or white gouache can be used.</span></button>
+                        <button id="iron-triad" class="tooltip">Iron triad<span class="tooltiptext">Limited palette of only iron-based paints. Includes white gouache.</span></button>
                     </fieldset>
                 </div>
                 
