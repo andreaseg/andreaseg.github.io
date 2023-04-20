@@ -99,7 +99,7 @@
                 max-width: 100%;
             }
 
-            @media only screen and (max-width: 1000px) {
+            @media only screen and (max-width: 1200px) {
                 .content {
                     grid-template-columns: auto;
                     grid-template-rows: auto auto;
@@ -210,7 +210,7 @@
                 new Color("Neutral Tint", "S", 309, 10, 28, colorGroups.black),
                 new Color("Moonglow", "DS", 255, 29, 41, colorGroups.black),
                 new Color("P. Green Light", "DS", 116, 48, 52, colorGroups.normal),
-                new Color("Light Red", "WN", 16, 71, 50, colorGroups.normal)
+                new Color("Light Red", "WN", 16, 71, 50, colorGroups.earth)
             ];
 
             const brands = {
@@ -236,7 +236,7 @@
                     "WN Yellow Ochre",
                     "WN Venetian Red",
                     "WN Vandyke Brown",
-                    "WN Raw Umber",
+                    "WN Light Red",
                     "WN Ivory Black",
                     "DS Moonglow",
                     "DS P. Green Light"
@@ -778,11 +778,11 @@
                 <fieldset id="palettes">
                     <legend>Palette</legend>
                     <input type="radio" id="radio-palette-1" class="radio-palette" name="p" value="1" checked>
-                    <label for="radio-palette-1">#1</label>
-                    <input type="radio" id="radio-palette-2" class="radio-palette" name="p" value="2">
-                    <label for="radio-palette-2">#2</label>
+                    <label for="radio-palette-1">Normal</label>
+                    <!--<input type="radio" id="radio-palette-2" class="radio-palette" name="p" value="2">
+                    <label for="radio-palette-2">#2</label> -->
                     <input type="radio" id="radio-palette-3" class="radio-palette" name="p" value="3">
-                    <label for="radio-palette-3">#3</label>
+                    <label for="radio-palette-3">Travel</label>
                     <input type="radio" id="radio-palette-all" class="radio-palette" name="p" value="all">
                     <label for="radio-palette-all">Full</label>
                     <button id="random-comp" class="tooltip">Complementary <span class="tooltiptext">Pick two complementary colors from the selected palette.</span></button>
