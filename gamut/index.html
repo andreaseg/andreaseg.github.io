@@ -149,24 +149,22 @@
         <script>
 
             const hueToRealAngle = (hue, invert) => {
-                let k = 1;
-                if (invert === true) {
-                    k = -1;
-                }
+                
+                const z = Math.PI * hue / 180;
 
-                const z = Math.PI * hue / 360;
-
-                const a = -48;
-                const b = -18;
-                const c = -3.5;
-                const d = 18;
-                const e = -9.5;
-                const f = -3.5;
+                const k = invert ? 42 : -44.5;
+                const a = invert ? 23 : 9.5;
+                const b = invert ? 2.5 : 2.5;
+                const c = invert ? 1 : 8.5;
+                const d = invert ? 5 : -2.5;
+                const e = invert ? 2.5 : 2.5;
+                const f = invert ? -2.5 : 1;
                 return (
                     hue
-                    + a * k * Math.sin(z)
-                    + b * k * Math.sin(2 * z)
-                    + c * k * Math.sin(3 * z)
+                    + k * Math.sin(0.5 * z)
+                    + a * Math.sin(1 * z)
+                    + b * Math.sin(2 * z)
+                    + c * Math.sin(3 * z)
                     + d * Math.sin(4 * z)
                     + e * Math.sin(5 * z)
                     + f * Math.sin(6 * z)
