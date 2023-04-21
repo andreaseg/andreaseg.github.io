@@ -167,16 +167,18 @@
                     + a * k * Math.sin(z)
                     + b * k * Math.sin(2 * z)
                     + c * k * Math.sin(3 * z)
-                    + d * k * Math.sin(4 * z)
-                    + e * k * Math.sin(5 * z)
-                    + f * k * Math.sin(6 * z)
+                    + d * Math.sin(4 * z)
+                    + e * Math.sin(5 * z)
+                    + f * Math.sin(6 * z)
                     ) % 360;
             };
 
             const hslString = (hue, saturation, lightness) => `hsl(${hue}, ${saturation}%, ${lightness}%)`
 
             const hslToCanvasCoord = (color) => {
-                return polarToCart(450 * color.saturation / 100, hueToRealAngle(color.hue, true) / 180 * Math.PI - 0.5 * Math.PI);
+                const realAngle = hueToRealAngle(color.hue, true);
+                console.log(color, realAngle)
+                return polarToCart(450 * color.saturation / 100, realAngle / 180 * Math.PI - 0.5 * Math.PI);
             };
 
             const colorGroups = {
