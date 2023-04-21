@@ -148,7 +148,36 @@
         </style>
         <script>
 
+            const hueToRealAngle = (hue, invert) => {
+                let k = 1;
+                if (invert === true) {
+                    k = -1;
+                }
+
+                const z = Math.PI * hue / 360;
+
+                const a = -48;
+                const b = -18;
+                const c = -3.5;
+                const d = 18;
+                const e = -9.5;
+                const f = -3.5;
+                return (
+                    hue
+                    + a * k * Math.sin(z)
+                    + b * k * Math.sin(2 * z)
+                    + c * k * Math.sin(3 * z)
+                    + d * k * Math.sin(4 * z)
+                    + e * k * Math.sin(5 * z)
+                    + f * k * Math.sin(6 * z)
+                    ) % 360;
+            };
+
             const hslString = (hue, saturation, lightness) => `hsl(${hue}, ${saturation}%, ${lightness}%)`
+
+            const hslToCanvasCoord = (color) => {
+                return polarToCart(450 * color.saturation / 100, hueToRealAngle(color.hue, true) / 180 * Math.PI - 0.5 * Math.PI);
+            };
 
             const colorGroups = {
                 normal: 0,
@@ -364,9 +393,7 @@
                 ctx.fill(path);
             };
 
-            const hslToCanvasCoord = (color) => {
-                return polarToCart(450 * color.saturation / 100, color.hue / 180 * Math.PI - 0.5 * Math.PI);
-            };
+            
 
             const drawColorWheel = (ctx, lightness) => {
 
@@ -382,9 +409,10 @@
                     for (let a = 0; a < angularSegments; a++) {
                         const radiusLength = 0.5 / radialSegments;
                         const angleLength = 2 * Math.PI / angularSegments;
+                        const real_hue_angle = hueToRealAngle(360 * (a / angularSegments));
                         drawSegment(
                             ctx, 
-                            hslString(360 * (a / angularSegments), 100 * ((r + 0.5) / radialSegments), lightness), 
+                            hslString(real_hue_angle, 100 * ((r + 0.5) / radialSegments), lightness), 
                             radiusLength * r, 
                             radiusLength * 1.02, 
                             angleLength * a + (- Math.PI / 2 - (Math.PI / angularSegments)), 
