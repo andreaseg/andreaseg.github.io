@@ -150,25 +150,49 @@
 
             const hueToRealAngle = (hue, invert) => {
                 
-                const z = Math.PI * hue / 180;
+                redAngle = 0 * 60;
+                orangeAngle = 1 * 60;
+                yellowAngle = 2 * 60;
+                greenAngle = 3 * 60;
+                blueAngle = 4 * 60;
+                violetAngle = 5 * 60;
+                redSecondAngle = 6 * 60;
 
-                const k = invert ? 42 : -44.5;
-                const a = invert ? 23 : 9.5;
-                const b = invert ? 2.5 : 2.5;
-                const c = invert ? 1 : 8.5;
-                const d = invert ? 5 : -2.5;
-                const e = invert ? 2.5 : 2.5;
-                const f = invert ? -2.5 : 1;
-                return (
-                    hue
-                    + k * Math.sin(0.5 * z)
-                    + a * Math.sin(1 * z)
-                    + b * Math.sin(2 * z)
-                    + c * Math.sin(3 * z)
-                    + d * Math.sin(4 * z)
-                    + e * Math.sin(5 * z)
-                    + f * Math.sin(6 * z)
-                    ) % 360;
+                redHue = 0;
+                orangeHue = 30;
+                yellowHue = 60;
+                greenHue = 120;
+                blueHue = 240;
+                violetHue = 270;
+                redSecondHue = 360;
+
+                const angleToHues = [
+                    [redAngle, redHue],
+                    [orangeAngle, orangeHue],
+                    [yellowAngle, yellowHue],
+                    [greenAngle, greenHue],
+                    [blueAngle, blueHue],
+                    [violetAngle, violetHue],
+                    [redSecondAngle, redSecondHue]
+                ]
+
+                const from = invert ? 1 : 0;
+                const to = 1 - from;
+
+                for (let i = 0; i < angleToHues.length; i++) {
+                    const min = angleToHues[i][from];
+                    const max = angleToHues[(i + 1) % angleToHues.length][from];
+                    if (hue >= min && hue < max) {
+                        
+                        const tmin = angleToHues[i][to];
+                        const tmax = angleToHues[(i + 1) % angleToHues.length][to];
+
+                        const scale = (hue - min) / (max - min);
+
+                        return (tmin + scale * (tmax - tmin)) % 360;
+                    }
+                }
+                return 0;
             };
 
             const hslString = (hue, saturation, lightness) => `hsl(${hue}, ${saturation}%, ${lightness}%)`
