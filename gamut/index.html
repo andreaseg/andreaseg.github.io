@@ -175,7 +175,6 @@
 
             const hslToCanvasCoord = (color) => {
                 const realAngle = hueToRealAngle(color.hue, true);
-                console.log(color, realAngle)
                 return polarToCart(450 * color.saturation / 100, realAngle / 180 * Math.PI - 0.5 * Math.PI);
             };
 
@@ -239,7 +238,10 @@
                 new Color("Neutral Tint", "S", 309, 10, 28, colorGroups.black),
                 new Color("Moonglow", "DS", 255, 29, 41, colorGroups.black),
                 new Color("P. Green Light", "DS", 116, 48, 52, colorGroups.normal),
-                new Color("Light Red", "WN", 16, 71, 50, colorGroups.earth)
+                new Color("Light Red", "WN", 16, 71, 50, colorGroups.earth),
+                new Color("Scarlet Red", "S", 355, 68, 59, colorGroups.normal),
+                new Color("Viridian", "S", 167, 33, 51, colorGroups.normal),
+                new Color("Cadmium Yellow Light", "S", 54, 94, 58, colorGroups.normal)
             ];
 
             const brands = {
@@ -677,10 +679,23 @@
             };
 
             const paletteFromLimited = (paletteList) => {
+
+                const colorsIter = [...colors];
+
                 enableColors(
-                    [...colors]
-                    .map((value, idx) => [value, idx])
-                    .filter(([value, idx], _) => paletteList.includes(`${value.brand} ${value.name}`))
+                    paletteList
+                    .map(str => {
+                        const c = colorsIter
+                            .map((value, idx) => [value, idx])
+                            .filter(([value, _]) => `${value.brand} ${value.name}` == str);
+
+                        if (c.length > 0) {
+                            return c[0];
+                        } else {
+                            console.error(`Unknown color ${str}`)
+                        }
+                    })
+                    .filter(it => it != null)
                     .map(([value, idx], _) => idx)
                 );
             }
@@ -710,6 +725,27 @@
                     "WN Light Red",
                     "WN Yellow Ochre",
                     "R Prussian Blue"
+                ];
+                paletteFromLimited(palette);
+            };
+
+            const gurneyPleinAir = () => {
+                const palette = [
+                    "S Cadmium Yellow Light",
+                    "S Scarlet Red",
+                    "WN Alizarin Crimson",
+                    "R Ultramarine",
+                    "R Burnt Sienna",
+                    "S Viridian"
+                ];
+                paletteFromLimited(palette);
+            };
+
+            const gurneyLandscape = () => {
+                const palette = [
+                    "WN Venetian Red",
+                    "WN Yellow Ochre",
+                    "R Ultramarine"
                 ];
                 paletteFromLimited(palette);
             };
@@ -775,6 +811,8 @@
                 document.getElementById("random-comp").onclick = complementary;
                 document.getElementById("zorn").onclick = zornLimited;
                 document.getElementById("iron-triad").onclick = ironTriad;
+                document.getElementById("gurney-landscape").onclick = gurneyLandscape;
+                document.getElementById("gurney-plein-air").onclick = gurneyPleinAir;
 
                 document.getElementById("save-button").onclick = writeStateToPath;
                 document.getElementById("clear-button").onclick = clearPalette;
@@ -822,6 +860,8 @@
                     <button id="fowkes" class="tooltip">Fowkes limited<span class="tooltiptext">The limited palette from the book How to Paint Landscapes Quickly and Beautifully in Watercolor and Gouache by Nathan Fowkes.</span></button>
                     <button id="zorn" class="tooltip">Zorn palette<span class="tooltiptext">The famous portrait palettte from Anders Zorn. For white either the white of the paper, or white gouache can be used.</span></button>
                     <button id="iron-triad" class="tooltip">Iron triad<span class="tooltiptext">Limited palette of only iron-based paints. Includes white gouache.</span></button>
+                    <button id="gurney-landscape" class="tooltip">Landscape triad<span class="tooltiptext">Limited palette suitable for landscapes. Includes white gouache. From Color and Light by James Gurney.</span></button>
+                    <button id="gurney-plein-air" class="tooltip">Compact plein air<span class="tooltiptext">Compact palette suitable for plein air painting. Includes white gouache. From Color and Light by Gurney.</span></button>
                 </fieldset>
                 
                 
