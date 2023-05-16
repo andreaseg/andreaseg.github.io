@@ -195,11 +195,24 @@
                 return 0;
             };
 
+            const hsl2rgb = (h,s,l) => {
+                const a= s*Math.min(l,1-l);
+                const f= (n,k=(n+h/30)%12) => l - a*Math.max(Math.min(k-3,9-k,1),-1);
+                return [250 * f(0), 250 * f(8), 250 * f(4)];
+            };
+
+            const hsl2chroma = (h, s, l) => {
+                const [r, g, b] = hsl2rgb(h, s / 100.0, l / 100.0);
+                const M = Math.max(r, Math.max(g, b));
+                const m = Math.min(r, Math.min(g, b));
+                return (M - m) / 2.5;
+            };
+
             const hslString = (hue, saturation, lightness) => `hsl(${hue}, ${saturation}%, ${lightness}%)`
 
             const hslToCanvasCoord = (color) => {
                 const realAngle = hueToRealAngle(color.hue, true);
-                return polarToCart(450 * color.saturation / 100, realAngle / 180 * Math.PI - 0.5 * Math.PI);
+                return polarToCart(450 * color.chroma / 100, realAngle / 180 * Math.PI - 0.5 * Math.PI);
             };
 
             const colorGroups = {
@@ -216,21 +229,22 @@
                     this.saturation = saturation;
                     this.lightness = lightness;
                     this.colorGroup = colorGroup;
+                    this.chroma = hsl2chroma(hue, saturation, lightness);
                 }
             }
 
             const black = new Color('Black', 0, 0, 0);
 
             const colors = [
-                new Color("Alizarin Crimson", "WN", 349, 53, 50, colorGroups.normal),
+                new Color("Alizarin Crimson", "WN", 349, 57, 54, colorGroups.normal),
                 new Color("Cadmium Red", "WN", 357, 97, 50, colorGroups.normal),
                 new Color("Cadmium Orange", "WN", 32, 95, 50, colorGroups.normal),
                 new Color("Cadmium Yellow", "WN", 40, 95, 50, colorGroups.normal),
                 new Color("Winsor Lemon", "WN", 54, 90, 70, colorGroups.normal),
                 new Color("Sap Green", "WN", 86, 42, 55, colorGroups.normal),
                 new Color("Green Gold", "DS", 59, 61, 65, colorGroups.normal),
-                new Color("Winsor Green", "WN", 172, 76, 44, colorGroups.normal),
-                new Color("Winsor Blue", "WN", 203, 82, 50, colorGroups.normal),
+                new Color("Winsor Green", "WN", 172, 100, 30, colorGroups.normal),
+                new Color("Winsor Blue", "WN", 203, 82, 37, colorGroups.normal),
                 new Color("Ultramarine", "R", 221, 77, 42, colorGroups.normal),
                 new Color("Winsor Violet", "WN", 257, 53, 36, colorGroups.normal),
                 new Color("Yellow Ochre", "WN", 34, 59, 70, colorGroups.earth),
@@ -247,7 +261,7 @@
                 new Color("Phtalo Green", "R", 175, 84, 69, colorGroups.normal),
                 new Color("Prussian Blue", "R", 203, 72, 68, colorGroups.normal),
                 new Color("Indian Yellow", "R", 47, 90, 60, colorGroups.normal),
-                new Color("Q. Rose Magenta", "R", 330, 81, 75, colorGroups.normal),
+                new Color("Q. Rose Magenta", "R", 326, 81, 60, colorGroups.normal),
                 new Color("Lemon Yellow", "S", 58, 86, 53, colorGroups.normal),
                 new Color("Q. Gold Hue", "S", 36, 78, 49, colorGroups.normal),
                 new Color("Transparent Orange", "S", 25, 93, 45, colorGroups.normal),
@@ -261,12 +275,12 @@
                 new Color("Perylene Green", "S", 80, 9, 29, colorGroups.normal),
                 new Color("Neutral Tint", "S", 309, 10, 28, colorGroups.black),
                 new Color("Moonglow", "DS", 255, 29, 41, colorGroups.black),
-                new Color("P. Green Light", "DS", 116, 48, 52, colorGroups.normal),
+                new Color("P. Green Light", "DS", 116, 56, 52, colorGroups.normal),
                 new Color("Light Red", "WN", 16, 71, 50, colorGroups.earth),
                 new Color("Scarlet Red", "S", 355, 68, 59, colorGroups.normal),
                 new Color("Viridian", "S", 167, 33, 51, colorGroups.normal),
                 new Color("Cadmium Yellow Light", "S", 54, 94, 58, colorGroups.normal),
-                new Color("Cobalt Turquoise", "S", 190, 71, 71, colorGroups.normal)
+                new Color("Cobalt Turquoise", "S", 190, 79, 60, colorGroups.normal)
             ];
 
             const brands = {
@@ -437,9 +451,11 @@
                         const radiusLength = 0.5 / radialSegments;
                         const angleLength = 2 * Math.PI / angularSegments;
                         const real_hue_angle = hueToRealAngle(360 * (a / angularSegments));
+                        const saturation = 100 * ((r + 0.5) / radialSegments);
+                        const chroma = hsl2chroma(real_hue_angle, saturation, lightness);
                         drawSegment(
                             ctx, 
-                            hslString(real_hue_angle, 100 * ((r + 0.5) / radialSegments), lightness), 
+                            hslString(real_hue_angle, chroma, lightness), 
                             radiusLength * r, 
                             radiusLength * 1.02, 
                             angleLength * a + (- Math.PI / 2 - (Math.PI / angularSegments)), 
@@ -897,7 +913,7 @@
                 
             </div>
             
-            <canvas id="color-wheel" width="1000" height="1000"></canvas>
+            <canvas id="color-wheel" width="1100" height="1000"></canvas>
         </div>
     </body>
 </html>
