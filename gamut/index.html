@@ -208,6 +208,40 @@
                 return (M - m) / 2.5;
             };
 
+            const _hcl2saturation = (h, c, l) => {
+                const bisections = 8;
+                let min = 0;
+                let max = 100;
+
+                for (let i = 0; i < bisections; i++) {
+                    const pivot = (min + max) / 2;
+                    const error1 = Math.abs(c - hsl2chroma(h, (min + pivot) / 2, l));
+                    const error2 = Math.abs(c - hsl2chroma(h, (max + pivot) / 2, l));
+                    if (error2 > error1) {
+                        max = pivot;
+                    } else {
+                        min = pivot;
+                    }
+                }
+                return (min + max) / 2;
+
+            };
+
+            const _hcl2saturationCache = new Map()
+
+            const hcl2saturation = (h, c, l) => {
+                const key = `${h},${c},${l}`;
+                if (_hcl2saturationCache.has(key)) {
+                    return _hcl2saturationCache.get(key);
+                } else {
+                    const value = _hcl2saturation(h, c, l);
+                    _hcl2saturationCache.set(key, value);
+                    return value;
+                }
+            };
+
+            
+
             const hslString = (hue, saturation, lightness) => `hsl(${hue}, ${saturation}%, ${lightness}%)`
 
             const hslToCanvasCoord = (color) => {
@@ -451,11 +485,11 @@
                         const radiusLength = 0.5 / radialSegments;
                         const angleLength = 2 * Math.PI / angularSegments;
                         const real_hue_angle = hueToRealAngle(360 * (a / angularSegments));
-                        const saturation = 100 * ((r + 0.5) / radialSegments);
-                        const chroma = hsl2chroma(real_hue_angle, saturation, lightness);
+                        const chroma = 100 * ((r + 0.5) / radialSegments);
+                        const saturation = hcl2saturation(real_hue_angle, chroma, lightness);
                         drawSegment(
                             ctx, 
-                            hslString(real_hue_angle, chroma, lightness), 
+                            hslString(real_hue_angle, saturation, lightness), 
                             radiusLength * r, 
                             radiusLength * 1.02, 
                             angleLength * a + (- Math.PI / 2 - (Math.PI / angularSegments)), 
